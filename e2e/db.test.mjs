@@ -166,3 +166,24 @@ describe('corners: athlete access', () => {
     assert.ok(!JSON.stringify(notes).includes('anna@example.com'));
   });
 });
+
+describe('session-playback: audio access', () => {
+  test('R3: the owner can download a note; another athlete and anon cannot', async () => {
+    const [a, b] = [await newAthlete(), await newAthlete()];
+    const corner = await seedCorner(a);
+    const note = await getNote(await sendNote(corner, 'Anna'));
+    const path = `/storage/v1/object/authenticated/notes/${note.audio_path}`;
+
+    const mine = await fetch(`http://127.0.0.1:54321${path}`, { headers: { authorization: `Bearer ${a.token}` } });
+    assert.equal(mine.status, 200);
+    assert.equal(Buffer.from(await mine.arrayBuffer()).subarray(0, 4).toString(), 'RIFF');
+
+    assert.equal((await api(path, { token: b.token })).ok, false);
+    assert.equal((await api(path)).ok, false);
+
+    const signed = await api(`/storage/v1/object/sign/notes/${note.audio_path}`, { token: a.token, method: 'POST', body: { expiresIn: 60 } });
+    assert.equal(signed.ok, true);
+    const signedForB = await api(`/storage/v1/object/sign/notes/${note.audio_path}`, { token: b.token, method: 'POST', body: { expiresIn: 60 } });
+    assert.equal(signedForB.ok, false);
+  });
+});
