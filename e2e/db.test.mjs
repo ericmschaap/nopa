@@ -187,3 +187,54 @@ describe('session-playback: audio access', () => {
     assert.equal(signedForB.ok, false);
   });
 });
+
+describe('heard-tracking: marking a note heard', () => {
+  const mark = (athlete, id, heardAt) =>
+    rpc('mark_note_heard', heardAt ? { p_note_id: id, p_heard_at: heardAt } : { p_note_id: id }, athlete ? { token: athlete.token } : {});
+
+  test('R1 + R3: the owner marks a note heard and the time it was heard is kept', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a);
+    const id = await sendNote(corner, 'Anna', { createdAt: new Date(Date.now() - 3600e3).toISOString() });
+    const heardAt = new Date(Date.now() - 5 * 60e3).toISOString(); // heard 5 minutes ago, synced now
+    const r = await mark(a, id, heardAt);
+    assert.equal(r.ok, true);
+    assert.equal(new Date((await getNote(id)).heard_at).toISOString(), heardAt);
+  });
+
+  test('R4: another athlete or a supporter cannot mark it', async () => {
+    const [a, b] = [await newAthlete(), await newAthlete()];
+    const id = await sendNote(await seedCorner(a));
+    assert.equal((await mark(b, id)).ok, false);
+    assert.equal((await mark(null, id)).ok, false);
+    assert.equal((await getNote(id)).heard_at, null);
+    // and nobody can write heard_at directly
+    const direct = await api(`/rest/v1/notes?id=eq.${id}`, { token: b.token, method: 'PATCH', body: { heard_at: new Date().toISOString() } });
+    const directOwner = await api(`/rest/v1/notes?id=eq.${id}`, { token: a.token, method: 'PATCH', body: { heard_at: new Date().toISOString() } });
+    assert.equal(direct.ok, false);
+    assert.equal(directOwner.ok, false);
+    assert.equal((await getNote(id)).heard_at, null);
+  });
+
+  test('R4: marking again keeps the first time', async () => {
+    const a = await newAthlete();
+    const id = await sendNote(await seedCorner(a), 'Anna', { createdAt: new Date(Date.now() - 3600e3).toISOString() });
+    const first = new Date(Date.now() - 30 * 60e3).toISOString();
+    await mark(a, id, first);
+    const again = await mark(a, id, new Date(Date.now() - 60e3).toISOString());
+    assert.equal(again.ok, true);
+    assert.equal(new Date((await getNote(id)).heard_at).toISOString(), first);
+  });
+
+  test('a heard time cannot be in the future or before the note existed', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a);
+    const future = await sendNote(corner);
+    await mark(a, future, new Date(Date.now() + 3600e3).toISOString());
+    assert.ok(Math.abs(new Date((await getNote(future)).heard_at) - Date.now()) < 10_000);
+    const past = await sendNote(corner);
+    await mark(a, past, '2001-01-01T00:00:00Z');
+    const n = await getNote(past);
+    assert.equal(n.heard_at, n.created_at);
+  });
+});
