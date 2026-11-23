@@ -9,7 +9,7 @@
 | 003 | corners-share-links | archived |
 | 004 | session-playback | archived (real-phone checks pending) |
 | 005 | heard-tracking | archived |
-| 006 | streak | in progress |
+| 006 | streak | archived |
 
 ## Stubbed
 
