@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, SafeAreaView, ScrollView, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { listCorners } from './src/lib/api';
+import { listCorners, type NoteRow } from './src/lib/api';
+import { createSessionAudio } from './src/lib/audio';
+import { downloadNotes } from './src/lib/download';
+import { Session, type SessionState } from './src/lib/session';
+import { SessionScreen } from './src/screens/SessionScreen';
 import { isConfigured } from './src/lib/config';
 import type { Corner } from './src/lib/corner';
 import { ensureSignedIn } from './src/lib/supabase';
@@ -11,13 +15,31 @@ import { CreateCornerScreen } from './src/screens/CreateCornerScreen';
 import { Body, Button, Title } from './src/ui/kit';
 import { useTheme } from './src/ui/theme';
 
-type Screen = { name: 'corners' } | { name: 'create' } | { name: 'corner'; corner: Corner };
+type Screen =
+  | { name: 'corners' }
+  | { name: 'create' }
+  | { name: 'corner'; corner: Corner }
+  | { name: 'session'; corner: Corner; session: Session };
 
 export default function App() {
   const t = useTheme();
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [corners, setCorners] = useState<Corner[]>([]);
   const [screen, setScreen] = useState<Screen>({ name: 'corners' });
+  const [sessionState, setSessionState] = useState<SessionState | null>(null);
+
+  async function startSession(corner: Corner, notes: NoteRow[], minutes: number) {
+    const downloaded = await downloadNotes(notes); // before anything plays: no network needed later
+    const session = new Session({
+      notes: downloaded,
+      durationMs: minutes * 60_000,
+      audio: createSessionAudio(corner.name),
+      onChange: setSessionState,
+    });
+    setSessionState(session.getState());
+    await session.start();
+    setScreen({ name: 'session', corner, session });
+  }
 
   const load = useCallback(async () => {
     setState('loading');
@@ -61,8 +83,19 @@ export default function App() {
         }}
       />
     );
+  } else if (screen.name === 'session' && sessionState) {
+    const { corner } = screen;
+    body = <SessionScreen cornerName={corner.name} session={screen.session} state={sessionState} onDone={() => setScreen({ name: 'corner', corner })} />;
   } else if (screen.name === 'corner') {
-    body = <CornerScreen corner={screen.corner} onBack={() => setScreen({ name: 'corners' })} />;
+    const { corner } = screen;
+    body = (
+      <CornerScreen
+        key={corner.id}
+        corner={corner}
+        onBack={() => setScreen({ name: 'corners' })}
+        onStart={(notes, minutes) => startSession(corner, notes, minutes)}
+      />
+    );
   } else {
     body = <CornersScreen corners={corners} onOpen={(corner) => setScreen({ name: 'corner', corner })} onNew={() => setScreen({ name: 'create' })} />;
   }

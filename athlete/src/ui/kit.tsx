@@ -39,9 +39,9 @@ export function Title(props: { children: ReactNode }) {
   return <Text accessibilityRole="header" style={{ fontSize: 28, fontWeight: '700', color: t.ink, marginBottom: 4 }}>{props.children}</Text>;
 }
 
-export function Body(props: { children: ReactNode; muted?: boolean; style?: TextStyle }) {
+export function Body(props: { children: ReactNode; muted?: boolean; style?: TextStyle; testID?: string }) {
   const t = useTheme();
-  return <Text style={[{ fontSize: 17, lineHeight: 25, color: props.muted ? t.muted : t.ink }, props.style]}>{props.children}</Text>;
+  return <Text testID={props.testID} style={[{ fontSize: 17, lineHeight: 25, color: props.muted ? t.muted : t.ink }, props.style]}>{props.children}</Text>;
 }
 
 export function ErrorText(props: { children: ReactNode }) {
