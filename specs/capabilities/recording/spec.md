@@ -2,7 +2,8 @@
 
 A supporter records a short voice note from the share link and sends it.
 
-Status: planned (change 002).
+Status: built in change 002. Page: `supporter/`. Server rules: `supabase/migrations/*recording*`.
+Verified by `e2e/supporter.spec.mjs` and `e2e/db.test.mjs`.
 
 ## Requirements
 
@@ -22,6 +23,10 @@ listen back or re-record before sending.
   WHEN they tap record
   THEN they see a plain explanation and nothing is sent.
 
+- GIVEN a recording shorter than half a second, or one the browser cannot decode
+  WHEN recording stops
+  THEN the supporter is asked to try once more and nothing is kept.
+
 ### R2 — Send with a first name, no account
 The system SHALL store a submitted note against the corner with the supporter's first name,
 without any account.
@@ -37,7 +42,8 @@ without any account.
 ### R3 — Optional contact after sending
 The system SHALL offer, after the note is sent, an optional field for an email or phone
 number, and SHALL store it with the note for a later "they listened" notification. The
-system SHALL NOT send any notification yet.
+system SHALL NOT send any notification yet. A contact can be attached only with the note's
+id (known only to its sender) and only within one hour of sending.
 
 - GIVEN a supporter who has just sent a note
   WHEN they enter "anna@example.com" and save
@@ -59,4 +65,5 @@ The system SHALL store notes in a format both iOS and Android can play natively.
 
 - GIVEN a note recorded in any supported browser
   WHEN it is uploaded
-  THEN it is stored as a mono 16-bit WAV file.
+  THEN it is stored as a mono 16-bit 22.05 kHz WAV file (at most 4 MB) in the private
+  `notes` bucket, which accepts nothing else.

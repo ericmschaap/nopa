@@ -2,7 +2,7 @@
 
 Each corner has one link the athlete sends to their people.
 
-Status: planned (changes 002 and 003).
+Status: R2–R4 built in change 002 (`supporter/`, `get_corner_by_token`); R1 planned (change 003).
 
 ## Requirements
 
@@ -29,6 +29,11 @@ does not match a corner.
 - GIVEN a link with a token that matches no corner (or no token at all)
   WHEN someone opens it
   THEN they see a gentle "this link doesn't seem to lead anywhere" message and cannot record.
+
+- GIVEN a valid link opened with no connection to the backend
+  WHEN the page cannot load the corner
+  THEN it says it couldn't open the corner just now and offers "Try again", rather than
+  calling the link broken.
 
 ### R4 — The link reveals nothing else
 The system SHALL NOT expose other supporters' notes, names or contacts through the share link.
