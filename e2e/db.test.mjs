@@ -238,3 +238,95 @@ describe('heard-tracking: marking a note heard', () => {
     assert.equal(n.heard_at, n.created_at);
   });
 });
+
+describe('streak: one shared streak per corner', () => {
+  const WEEK = 7 * 24 * 3600e3;
+  const weeksAgo = (n) => new Date(Date.now() - n * WEEK).toISOString();
+  const streakOf = async (corner) => {
+    const [row] = (await rpc('get_corner_by_token', { p_token: corner.share_token })).json;
+    return { weeks: row.streak_weeks, kept: row.this_week_kept };
+  };
+  /** The internal function with a fixed "today", through the service role. */
+  const streakOn = async (corner, today) => {
+    const r = await admin('/rest/v1/rpc/corner_streak', { method: 'POST', body: { p_corner_id: corner.id, p_today: today } });
+    return { weeks: r.json[0].streak_weeks, kept: r.json[0].this_week_kept };
+  };
+
+  test('R1: notes from different people in three weeks running make a streak of 3', async () => {
+    const corner = await seedCorner(await newAthlete());
+    await sendNote(corner, 'Anna', { createdAt: weeksAgo(2) });
+    await sendNote(corner, 'Ben', { createdAt: weeksAgo(1) });
+    await sendNote(corner, 'Anna');
+    assert.deepEqual(await streakOf(corner), { weeks: 3, kept: true });
+  });
+
+  test('R1: three notes in the same week make a streak of 1', async () => {
+    const corner = await seedCorner(await newAthlete());
+    for (const name of ['Anna', 'Ben', 'Anna']) await sendNote(corner, name);
+    assert.deepEqual(await streakOf(corner), { weeks: 1, kept: true });
+  });
+
+  test('R2: no note yet this week keeps the streak alive, reported as not yet kept', async () => {
+    const corner = await seedCorner(await newAthlete());
+    await sendNote(corner, 'Anna', { createdAt: weeksAgo(2) });
+    await sendNote(corner, 'Ben', { createdAt: weeksAgo(1) });
+    assert.deepEqual(await streakOf(corner), { weeks: 2, kept: false });
+  });
+
+  test('R2: a whole week with no note breaks it', async () => {
+    const corner = await seedCorner(await newAthlete());
+    await sendNote(corner, 'Anna', { createdAt: weeksAgo(3) });
+    await sendNote(corner, 'Ben', { createdAt: weeksAgo(2) });
+    assert.deepEqual(await streakOf(corner), { weeks: 0, kept: false });
+  });
+
+  test('R2: a streak restarts after a gap', async () => {
+    const corner = await seedCorner(await newAthlete());
+    await sendNote(corner, 'Anna', { createdAt: weeksAgo(4) });
+    await sendNote(corner, 'Anna', { createdAt: weeksAgo(3) });
+    await sendNote(corner, 'Ben', { createdAt: weeksAgo(1) });
+    await sendNote(corner, 'Ben');
+    assert.deepEqual(await streakOf(corner), { weeks: 2, kept: true });
+  });
+
+  test('R2: a corner with no notes has no streak', async () => {
+    const corner = await seedCorner(await newAthlete());
+    assert.deepEqual(await streakOf(corner), { weeks: 0, kept: false });
+  });
+
+  test('R1: weeks run Monday to Sunday in UTC', async () => {
+    const corner = await seedCorner(await newAthlete());
+    await sendNote(corner, 'Anna', { createdAt: '2026-11-15T23:59:59Z' }); // Sunday: week of 9 Nov
+    await sendNote(corner, 'Ben', { createdAt: '2026-11-16T00:00:00Z' });  // Monday: week of 16 Nov
+    assert.deepEqual(await streakOn(corner, '2026-11-16'), { weeks: 2, kept: true });
+    assert.deepEqual(await streakOn(corner, '2026-11-22'), { weeks: 2, kept: true });  // Sunday, same week
+    assert.deepEqual(await streakOn(corner, '2026-11-23'), { weeks: 2, kept: false }); // Monday, new week opens
+    assert.deepEqual(await streakOn(corner, '2026-11-29'), { weeks: 2, kept: false }); // still open on Sunday
+    assert.deepEqual(await streakOn(corner, '2026-11-30'), { weeks: 0, kept: false }); // a week passed empty
+    assert.deepEqual(await streakOn(corner, '2026-11-15'), { weeks: 1, kept: true });  // before the second note's week
+  });
+
+  test('R3: nothing is computed or returned per sender', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a);
+    await sendNote(corner, 'Anna');
+    const link = (await rpc('get_corner_by_token', { p_token: corner.share_token })).json[0];
+    assert.deepEqual(Object.keys(link).sort(), ['finish_date', 'name', 'streak_weeks', 'this_week_kept']);
+    const mine = (await rpc('my_corner_streaks', {}, { token: a.token })).json[0];
+    assert.deepEqual(Object.keys(mine).sort(), ['corner_id', 'streak_weeks', 'this_week_kept']);
+  });
+
+  test('R4: the athlete gets the streak of their own corners only; the internal function is closed', async () => {
+    const [a, b] = [await newAthlete(), await newAthlete()];
+    const mine = await seedCorner(a);
+    const theirs = await seedCorner(b);
+    await sendNote(mine, 'Anna', { createdAt: weeksAgo(1) });
+    await sendNote(mine, 'Ben');
+    await sendNote(theirs, 'Chloé');
+    const r = await rpc('my_corner_streaks', {}, { token: a.token });
+    assert.deepEqual(r.json, [{ corner_id: mine.id, streak_weeks: 2, this_week_kept: true }]);
+    assert.equal((await rpc('my_corner_streaks', {})).ok, false);
+    assert.equal((await rpc('corner_streak', { p_corner_id: theirs.id }, { token: a.token })).ok, false);
+    assert.equal((await rpc('corner_streak', { p_corner_id: theirs.id })).ok, false);
+  });
+});
