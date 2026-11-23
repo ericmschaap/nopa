@@ -1,0 +1,21 @@
+{
+  "name": "nopa",
+  "private": true,
+  "description": "Nopa: your people's voices, spread through your training sessions.",
+  "scripts": {
+    "db:start": "supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,mailpit,postgres-meta,supavisor",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:test": "node e2e/db.test.mjs",
+    "supporter": "node scripts/serve.mjs supporter 8080",
+    "athlete:web": "npm run athlete:build-web && node scripts/serve.mjs athlete/dist 8081",
+    "test": "cd athlete && npm test",
+    "e2e": "npm run athlete:build-web && playwright test --config e2e/playwright.config.mjs --trace off",
+    "athlete:build-web": "cd athlete && EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 EXPO_PUBLIC_SUPABASE_ANON_KEY=$(node -e \"import(\\\"../e2e/local.mjs\\\").then(m=>console.log(m.ANON_KEY))\") EXPO_PUBLIC_SUPPORTER_URL=http://localhost:8080 npx expo export --platform web --output-dir dist",
+    "e2e:only": "playwright test --config e2e/playwright.config.mjs --trace off"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "supabase": "^3.3.0"
+  }
+}
