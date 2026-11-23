@@ -8,8 +8,8 @@
 | 002 | supporter-recording | archived |
 | 003 | corners-share-links | archived |
 | 004 | session-playback | archived (real-phone checks pending) |
-| 005 | heard-tracking | in progress |
-| 006 | streak | not started |
+| 005 | heard-tracking | archived |
+| 006 | streak | in progress |
 
 ## Stubbed
 

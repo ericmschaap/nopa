@@ -2,7 +2,9 @@
 
 A note is marked as heard, with the time, once the athlete has heard it.
 
-Status: planned (change 005).
+Status: built in change 005. Server: `mark_note_heard` in `supabase/migrations/`. App:
+`athlete/src/lib/heardOutbox.ts`, `heard.ts`, heard list in `CornerScreen.tsx`. Verified by
+`heardOutbox.test.ts`, `e2e/heard.spec.mjs`, `e2e/db.test.mjs`.
 
 ## Requirements
 
@@ -26,8 +28,9 @@ The system SHALL leave heard notes out of later sessions.
   THEN only the 1 unheard note is scheduled.
 
 ### R3 — Survives no signal
-The system SHALL keep a heard mark made without network and send it when the network is
-back, keeping the original timestamp.
+The system SHALL save a heard mark on the phone before sending it, retry unsent marks on the
+next launch and whenever a corner is refreshed, and keep the original timestamp. Until a mark
+has been sent, the app already treats the note as heard.
 
 - GIVEN a note that finished playing while the phone had no signal
   WHEN the app next has a connection
@@ -44,6 +47,10 @@ keep the first timestamp if a note is marked again.
 - GIVEN a note already heard at 10:00
   WHEN it is marked heard again at 11:00
   THEN `heard_at` is still 10:00.
+
+- GIVEN a mark whose time is in the future, or before the note was sent
+  WHEN the server stores it
+  THEN the time is brought into the range from the note's creation to now.
 
 ### R5 — The athlete can see what has been heard
 The system SHALL show the athlete, per corner, how many notes are waiting and which have
