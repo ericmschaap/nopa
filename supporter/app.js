@@ -218,7 +218,18 @@
     document.title = corner.name + ' – Nopa';
     renderStreak();
   }
-  function renderStreak() { show($('corner-streak'), false); }
+  // One streak for the whole corner, in gentle words. Never a count per person.
+  function renderStreak() {
+    var weeks = corner.streak_weeks || 0, kept = !!corner.this_week_kept, text;
+    if (weeks === 0) {
+      text = 'Be the first to share a moment this week.';
+    } else {
+      text = 'This corner has shared ' + (weeks === 1 ? '1 week' : weeks + ' weeks in a row') + '. ' +
+        (kept ? 'This week is already part of it.' : 'A note this week keeps it going.');
+    }
+    $('corner-streak').textContent = text;
+    show($('corner-streak'), true);
+  }
 
   function loadCorner() {
     return rpc('get_corner_by_token', { p_token: token }).then(function (rows) {
