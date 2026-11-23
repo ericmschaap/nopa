@@ -4,8 +4,8 @@
 
 | # | Change | Status |
 | --- | --- | --- |
-| 001 | scaffold-and-specs | in progress |
-| 002 | supporter-recording | not started |
+| 001 | scaffold-and-specs | archived |
+| 002 | supporter-recording | in progress |
 | 003 | corners-share-links | not started |
 | 004 | session-playback | not started |
 | 005 | heard-tracking | not started |
