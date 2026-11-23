@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nopa – playback proof</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --card: #ffffff; --ink: #1c1b19; --muted: #6b6860; --line: #dedbd2;
+    --accent: #0b6e4f; --accent-ink: #ffffff; --warn: #b3261e; --ok: #0b6e4f; --late: #a15c00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151513; --card: #201f1c; --ink: #eeece6; --muted: #a09c92; --line: #3a3833;
+      --accent: #35b88a; --accent-ink: #0c1512; --warn: #ff8a80; --ok: #35b88a; --late: #f0b45a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px; background: var(--bg); color: var(--ink);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 8px 0 2px; }
+  h2 { font-size: 1.05rem; margin: 0 0 10px; }
+  p { margin: 0 0 10px; }
+  .sub { color: var(--muted); font-size: .9rem; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin: 14px 0; }
+  button, .filebtn {
+    font: inherit; border: 1px solid var(--line); background: transparent; color: var(--ink);
+    border-radius: 8px; padding: 9px 12px; cursor: pointer; min-height: 42px;
+  }
+  button:disabled { opacity: .45; cursor: default; }
+  .filebtn { display: inline-flex; align-items: center; }
+  .filebtn input { display: none; }
+  .clip { border-top: 1px solid var(--line); padding: 10px 0; }
+  .clip:first-of-type { border-top: 0; padding-top: 0; }
+  .clip .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .clip .name { font-weight: 600; min-width: 4.5em; }
+  .clip .state { color: var(--muted); font-size: .9rem; flex: 1 1 8em; }
+  .clip audio { width: 100%; margin-top: 8px; height: 36px; }
+  .rec { border-color: var(--warn); color: var(--warn); }
+  label.opt { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; }
+  label.opt input { margin-top: 4px; width: 18px; height: 18px; flex: none; }
+  input[type=number] {
+    font: inherit; width: 5.5em; padding: 8px; border: 1px solid var(--line); border-radius: 8px;
+    background: transparent; color: var(--ink);
+  }
+  #start {
+    width: 100%; min-height: 84px; font-size: 1.5rem; font-weight: 700; border: 0;
+    background: var(--accent); color: var(--accent-ink); border-radius: 14px; margin-top: 8px;
+  }
+  #start.running { background: var(--warn); color: #fff; }
+  #status { margin-top: 10px; font-size: .95rem; white-space: pre-line; }
+  #track { width: 100%; margin-top: 10px; }
+  .warn { color: var(--warn); }
+  .run { border-top: 1px solid var(--line); padding: 12px 0; }
+  .run:first-of-type { border-top: 0; }
+  .run h3 { font-size: .95rem; margin: 0 0 6px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: .92rem; }
+  th, td { text-align: left; padding: 4px 6px 4px 0; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; }
+  .ok { color: var(--ok); } .late { color: var(--late); } .miss { color: var(--warn); }
+  details { margin-top: 6px; font-size: .82rem; }
+  details pre { white-space: pre-wrap; word-break: break-word; margin: 6px 0 0; color: var(--muted);
+    font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Nopa – playback proof</h1>
+  <p class="sub">Three voice notes, spaced through a session, played from a locked phone. Milestone 1 prototype.</p>
+  <p id="insecure" class="warn" hidden>This page is not on HTTPS, so the microphone is unavailable. Upload still works.</p>
+
+  <section>
+    <h2>1. Voice notes</h2>
+    <div id="clips"></div>
+    <p class="sub" style="margin-top:8px">Record (stops itself at 20 s) or upload. Notes are kept on this device between visits.</p>
+  </section>
+
+  <section>
+    <h2>2. Settings</h2>
+    <p><label>Gap between note starts: <input id="gap" type="number" min="0.1" step="any" value="10" inputmode="decimal"> minutes</label></p>
+    <label class="opt"><input type="radio" name="mode" value="A">
+      <span><b>A · Naive</b><br><span class="sub">Play note 1 now, then JavaScript timers start notes 2 and 3.</span></span></label>
+    <label class="opt"><input type="radio" name="mode" value="B" checked>
+      <span><b>B · Continuous</b><br><span class="sub">One long audio track with the notes baked in and silence between. Media Session metadata set.</span></span></label>
+    <label class="opt"><input type="checkbox" id="noise">
+      <span>Fill gaps with near-inaudible noise instead of pure silence <span class="sub">(mode B only – try this if silence gets the track killed or Bluetooth headphones clip the start of a note)</span></span></label>
+  </section>
+
+  <section>
+    <h2>3. Run</h2>
+    <button id="start" disabled>Start</button>
+    <div id="status" class="sub">Add three notes to enable Start.</div>
+    <audio id="track" controls preload="auto" hidden></audio>
+  </section>
+
+  <section>
+    <h2>4. Log</h2>
+    <div id="log"></div>
+    <div class="tools">
+      <button id="copy">Copy log as JSON</button>
+      <button id="clear">Clear log</button>
+    </div>
+    <p class="sub" style="margin-top:10px">“Started” is when the note actually began. In mode B it is derived from the track position,
+      so it stays accurate even if the page's JavaScript was asleep while locked; “JS saw it” shows how late the page noticed.
+      The log proves the track reached the note – your ears confirm sound came out.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var SR = 22050;                 // mono sample rate of everything we play
+  var MAX_REC_MS = 20000;         // recording auto-stop
+  var MAX_CLIP_SEC = 60;          // uploaded clips are truncated to this
+  var LOG_KEY = 'nopa_log_v1';
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- tiny DOM helper ----------
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    for (var k in (attrs || {})) {
+      if (k === 'text') el.textContent = attrs[k];
+      else if (k === 'class') el.className = attrs[k];
+      else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== false && attrs[k] != null) el.setAttribute(k, attrs[k]);
+    }
+    for (var i = 2; i < arguments.length; i++) {
+      var c = arguments[i];
+      if (c != null) el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+    return el;
+  }
+  function clock(ms) {
+    var d = new Date(ms), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function mmss(sec) {
+    sec = Math.max(0, Math.round(sec));
+    return Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60);
+  }
+
+  // ---------- audio helpers ----------
+  // Decode any audio blob to mono Float32 at SR. An OfflineAudioContext is used
+  // because decodeAudioData resamples to the context's rate and it does not
+  // touch the device's audio output/session.
+  function decodeToMono(blob) {
+    return blob.arrayBuffer().then(function (ab) {
+      var OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      var ctx = new OAC(1, SR, SR);
+      return new Promise(function (res, rej) {
+        var p = ctx.decodeAudioData(ab, res, rej);
+        if (p && p.catch) p.catch(rej);
+      });
+    }).then(function (buf) {
+      var n = buf.length, mono = new Float32Array(n), ch = buf.numberOfChannels;
+      for (var c = 0; c < ch; c++) {
+        var d = buf.getChannelData(c);
+        for (var i = 0; i < n; i++) mono[i] += d[i] / ch;
+      }
+      if (buf.sampleRate !== SR) {           // browser did not resample: do it linearly
+        var ratio = buf.sampleRate / SR, m = Math.floor(n / ratio), out = new Float32Array(m);
+        for (var j = 0; j < m; j++) {
+          var x = j * ratio, x0 = Math.floor(x), x1 = Math.min(x0 + 1, n - 1);
+          out[j] = mono[x0] + (mono[x1] - mono[x0]) * (x - x0);
+        }
+        mono = out;
+      }
+      if (mono.length > MAX_CLIP_SEC * SR) mono = mono.subarray(0, MAX_CLIP_SEC * SR);
+      return mono;
+    });
+  }
+  function toPcm16(f32) {
+    var n = f32.length, out = new Int16Array(n), fade = Math.min(Math.floor(SR * 0.01), n >> 1);
+    for (var i = 0; i < n; i++) {
+      var g = i < fade ? i / fade : (i >= n - fade ? (n - 1 - i) / fade : 1);
+      var s = Math.max(-1, Math.min(1, f32[i] * g));
+      out[i] = Math.round(s * 32767);
+    }
+    return out;
+  }
+  // Build a 16-bit mono WAV blob from parts (Int16Arrays). Parts may repeat the
+  // same array many times (silence), so a 20-minute track costs almost no JS memory.
+  function wavBlob(parts) {
+    var samples = 0;
+    parts.forEach(function (p) { samples += p.length; });
+    var bytes = samples * 2, hd = new DataView(new ArrayBuffer(44));
+    var str = function (o, s) { for (var i = 0; i < s.length; i++) hd.setUint8(o + i, s.charCodeAt(i)); };
+    str(0, 'RIFF'); hd.setUint32(4, 36 + bytes, true); str(8, 'WAVE'); str(12, 'fmt ');
+    hd.setUint32(16, 16, true); hd.setUint16(20, 1, true); hd.setUint16(22, 1, true);
+    hd.setUint32(24, SR, true); hd.setUint32(28, SR * 2, true); hd.setUint16(32, 2, true);
+    hd.setUint16(34, 16, true); str(36, 'data'); hd.setUint32(40, bytes, true);
+    return new Blob([hd.buffer].concat(parts), { type: 'audio/wav' });
+  }
+  function fillParts(parts, samples, noise) {
+    if (samples <= 0) return;
+    var sec = new Int16Array(SR);
+    if (noise) for (var i = 0; i < SR; i++) sec[i] = Math.round((Math.random() * 2 - 1) * 8); // about -72 dBFS
+    var whole = Math.floor(samples / SR), rest = samples - whole * SR;
+    for (var k = 0; k < whole; k++) parts.push(sec);
+    if (rest) parts.push(sec.subarray(0, rest));
+  }
+
+  // ---------- clip storage (IndexedDB, best effort) ----------
+  var db = null;
+  function dbOpen() {
+    return new Promise(function (res) {
+      try {
+        var r = indexedDB.open('nopa', 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore('clips'); };
+        r.onsuccess = function () { db = r.result; res(); };
+        r.onerror = function () { res(); };
+      } catch (e) { res(); }
+    });
+  }
+  function dbPut(i, val) {
+    if (!db) return;
+    try {
+      var tx = db.transaction('clips', 'readwrite');
+      if (val) tx.objectStore('clips').put(val, i); else tx.objectStore('clips').delete(i);
+    } catch (e) { /* storage is a convenience only */ }
+  }
+  function dbGet(i) {
+    return new Promise(function (res) {
+      if (!db) return res(null);
+      try {
+        var r = db.transaction('clips').objectStore('clips').get(i);
+        r.onsuccess = function () { res(r.result || null); };
+        r.onerror = function () { res(null); };
+      } catch (e) { res(null); }
+    });
+  }
+
+  // ---------- clips UI ----------
+  var clips = [null, null, null];   // { pcm: Int16Array, dur: seconds, url: wav blob url, src: label }
+  var slotMsg = ['', '', ''];
+  var recording = null;             // { i, mr, stream, t0, tick, stopTimer }
+
+  function setClipFromPcm(i, pcm, src) {
+    if (clips[i]) URL.revokeObjectURL(clips[i].url);
+    clips[i] = { pcm: pcm, dur: pcm.length / SR, url: URL.createObjectURL(wavBlob([pcm])), src: src };
+    slotMsg[i] = '';
+    renderClips(); refreshStart();
+  }
+  function setClipFromBlob(i, blob, src) {
+    slotMsg[i] = 'Decoding…'; renderClips();
+    return decodeToMono(blob).then(function (mono) {
+      if (mono.length < SR * 0.3) throw new Error('clip is empty or too short');
+      var pcm = toPcm16(mono);
+      setClipFromPcm(i, pcm, src);
+      dbPut(i, { pcm: pcm.buffer, src: src });
+    }).catch(function (e) {
+      slotMsg[i] = 'Could not read that audio (' + (e && e.message || e) + ')';
+      renderClips();
+    });
+  }
+  function removeClip(i) {
+    if (clips[i]) URL.revokeObjectURL(clips[i].url);
+    clips[i] = null; slotMsg[i] = ''; dbPut(i, null);
+    renderClips(); refreshStart();
+  }
+  function stopRecording() {
+    if (!recording) return;
+    clearInterval(recording.tick); clearTimeout(recording.stopTimer);
+    try { recording.mr.stop(); } catch (e) {}
+  }
+  function startRecording(i) {
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+      slotMsg[i] = 'Recording is not supported here – upload a file instead.'; renderClips(); return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      var mr = new MediaRecorder(stream), chunks = [];
+      mr.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      mr.onstop = function () {
+        // Release the mic so iOS leaves "play and record" mode before playback.
+        stream.getTracks().forEach(function (t) { t.stop(); });
+        recording = null;
+        setClipFromBlob(i, new Blob(chunks, { type: mr.mimeType || chunks[0] && chunks[0].type || '' }), 'recorded');
+      };
+      recording = { i: i, mr: mr, stream: stream, t0: Date.now() };
+      recording.tick = setInterval(renderClips, 500);
+      recording.stopTimer = setTimeout(stopRecording, MAX_REC_MS);
+      mr.start();
+      renderClips();
+    }).catch(function (e) {
+      slotMsg[i] = 'Microphone unavailable (' + (e && e.name || e) + ')'; renderClips();
+    });
+  }
+  function renderClips() {
+    var box = $('clips');
+    // Keep preview players alive while a recording timer re-renders.
+    box.textContent = '';
+    clips.forEach(function (c, i) {
+      var isRec = recording && recording.i === i;
+      var state = isRec ? 'Recording… ' + mmss((Date.now() - recording.t0) / 1000) + ' / 0:20'
+        : slotMsg[i] ? slotMsg[i]
+        : c ? c.src + ' · ' + c.dur.toFixed(1) + ' s' : 'empty';
+      var row = h('div', { class: 'row' },
+        h('span', { class: 'name', text: 'Note ' + (i + 1) }),
+        h('span', { class: 'state', text: state }),
+        h('button', {
+          class: isRec ? 'rec' : '', disabled: (recording && !isRec) || !!run,
+          text: isRec ? 'Stop' : 'Record',
+          onclick: function () { isRec ? stopRecording() : startRecording(i); }
+        }),
+        h('label', { class: 'filebtn' }, 'Upload',
+          h('input', {
+            type: 'file', accept: 'audio/*', disabled: !!recording || !!run,
+            onchange: function (e) {
+              var f = e.target.files[0];
+              if (f) setClipFromBlob(i, f, 'uploaded');
+            }
+          })),
+        c && !isRec ? h('button', { text: '✕', 'aria-label': 'Remove note ' + (i + 1), disabled: !!run,
+          onclick: function () { removeClip(i); } }) : null
+      );
+      var div = h('div', { class: 'clip' }, row);
+      if (c && !isRec) div.appendChild(h('audio', { controls: '', preload: 'metadata', src: c.url }));
+      box.appendChild(div);
+    });
+  }
+
+  // ---------- log (localStorage) ----------
+  var runs = [];
+  try { runs = JSON.parse(localStorage.getItem(LOG_KEY)) || []; } catch (e) { runs = []; }
+  function saveLog() {
+    try { localStorage.setItem(LOG_KEY, JSON.stringify(runs.slice(-20))); } catch (e) {}
+  }
+  function ev(r, msg) {
+    r.events.push({ t: Date.now(), msg: msg });
+    if (r.events.length > 300) r.events.splice(100, 1);
+    saveLog(); renderLog();
+  }
+  function renderLog() {
+    var box = $('log');
+    box.textContent = '';
+    if (!runs.length) { box.appendChild(h('p', { class: 'sub', text: 'No runs yet.' })); return; }
+    runs.slice().reverse().forEach(function (r) {
+      var live = run && r === run.rec;
+      var tbl = h('table', {}, h('tr', {},
+        h('th', { text: 'Note' }), h('th', { text: 'Due' }), h('th', { text: 'Started' }), h('th', { text: 'Off by' }),
+        r.mode === 'B' ? h('th', { text: 'JS saw it' }) : null));
+      r.planned.forEach(function (due, i) {
+        var c = r.clips[i], cells = [h('td', { text: String(i + 1) }), h('td', { text: clock(due) })];
+        if (c) {
+          var off = (c.actual - due) / 1000, good = Math.abs(off) <= 3;
+          cells.push(h('td', { text: clock(c.actual) }));
+          cells.push(h('td', { class: good ? 'ok' : 'late', text: (off >= 0 ? '+' : '') + off.toFixed(1) + ' s' }));
+          if (r.mode === 'B') cells.push(h('td', { text: '+' + ((c.observed - c.actual) / 1000).toFixed(1) + ' s' }));
+        } else {
+          var pending = live && Date.now() < due + 5000;
+          cells.push(h('td', { class: pending ? '' : 'miss', text: pending ? 'waiting' : 'not played' }));
+          cells.push(h('td', { text: '–' }));
+          if (r.mode === 'B') cells.push(h('td', { text: '–' }));
+        }
+        var tr = h('tr', {}); cells.forEach(function (x) { tr.appendChild(x); }); tbl.appendChild(tr);
+      });
+      var foot = r.end ? 'Ended ' + clock(r.end.t) + ' – ' + r.end.why + '.'
+        : live ? 'Running…' : 'No clean end recorded (page was closed, reloaded or killed).';
+      if (r.beat) foot += ' Last sign of life ' + clock(r.beat.t) + (r.mode === 'B' ? ' at track position ' + mmss(r.beat.pos) : '') + '.';
+      box.appendChild(h('div', { class: 'run' },
+        h('h3', { text: 'Mode ' + r.mode + ' · ' + new Date(r.t0).toLocaleDateString() + ' ' + clock(r.t0) +
+          ' · gap ' + (r.gapSec / 60) + ' min' + (r.noise ? ' · noise fill' : '') }),
+        tbl,
+        h('p', { class: 'sub', style: 'margin:6px 0 0', text: foot }),
+        h('details', {}, h('summary', { text: 'Events (' + r.events.length + ')' }),
+          h('pre', { text: r.events.map(function (e) { return clock(e.t) + '  ' + e.msg; }).join('\n') + '\n\n' + r.ua }))
+      ));
+    });
+  }
+
+  // ---------- running ----------
+  var run = null;   // { rec, timers[], audio, tick }
+  var track = $('track');
+
+  function selectedMode() { return document.querySelector('input[name=mode]:checked').value; }
+  function refreshStart() {
+    var ready = clips.every(Boolean), btn = $('start');
+    btn.disabled = !ready && !run;
+    btn.textContent = run ? 'Stop' : 'Start';
+    btn.className = run ? 'running' : '';
+    if (!run) $('status').textContent = ready ? 'Ready. Put headphones in, tap Start, then lock the phone.' : 'Add three notes to enable Start.';
+  }
+  function finish(why) {
+    if (!run) return;
+    var r = run;
+    run = null;
+    r.timers.forEach(clearTimeout); clearInterval(r.tick);
+    r.rec.end = { t: Date.now(), why: why };
+    ev(r.rec, 'run ended: ' + why);
+    if (r.audio) { r.audio.pause(); }
+    if (r.url) setTimeout(function () { URL.revokeObjectURL(r.url); }, 1000);
+    track.hidden = true;
+    renderClips(); refreshStart();
+    $('status').textContent = 'Finished (' + why + '). Check the log below.';
+  }
+
+  function start() {
+    var gapSec = Math.max(0.1, parseFloat($('gap').value) || 10) * 60;
+    var mode = selectedMode(), noise = mode === 'B' && $('noise').checked, t0 = Date.now();
+    // Note i starts i*gap after Start; never overlap the previous note.
+    var offsets = [], end = 0;
+    clips.forEach(function (c, i) {
+      var off = Math.max(i * gapSec, i ? end + 1 : 0);
+      offsets.push(off); end = off + c.dur;
+    });
+    var rec = {
+      mode: mode, gapSec: gapSec, noise: noise, t0: t0, ua: navigator.userAgent,
+      planned: offsets.map(function (o) { return Math.round(t0 + o * 1000); }),
+      clips: [null, null, null], events: [], beat: null, end: null
+    };
+    runs.push(rec);
+    run = { rec: rec, timers: [], audio: null, tick: null, offsets: offsets };
+    // iOS 17+: make sure we are in the plain "playback" audio session, not play-and-record.
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    ev(rec, 'start tapped, mode ' + mode + ', page ' + document.visibilityState);
+    if (mode === 'A') startNaive(run); else startContinuous(run);
+    renderClips(); refreshStart();
+    $('status').textContent = 'Mode ' + mode + ' running. Notes due at ' +
+      rec.planned.map(clock).join(', ') + '.\nLock the phone now and put it in your pocket.';
+    run.tick = setInterval(function () { if (run) { beat(run); renderLog(); } }, 5000);
+  }
+  function beat(r) {
+    r.rec.beat = { t: Date.now(), pos: r.audio ? r.audio.currentTime : 0 };
+    saveLog();
+  }
+
+  // Mode A: one <audio> element (unlocked by the Start tap), src swapped by setTimeout.
+  function startNaive(r) {
+    var a = new Audio(), cur = -1;
+    r.audio = a;
+    a.addEventListener('playing', function () {
+      if (!run || run !== r || r.rec.clips[cur]) return;
+      var now = Date.now();
+      r.rec.clips[cur] = { actual: now, observed: now };
+      ev(r.rec, 'note ' + (cur + 1) + ' audibly started');
+    });
+    a.addEventListener('ended', function () {
+      if (run !== r) return;
+      ev(r.rec, 'note ' + (cur + 1) + ' finished');
+      if (cur === clips.length - 1) finish('all notes done');
+    });
+    a.addEventListener('error', function () { if (run === r) ev(r.rec, 'audio error on note ' + (cur + 1)); });
+    function play(i) {
+      if (run !== r) return;
+      cur = i;
+      var late = (Date.now() - r.rec.planned[i]) / 1000;
+      if (i) ev(r.rec, 'timer for note ' + (i + 1) + ' fired ' + late.toFixed(1) + ' s after due time, page ' + document.visibilityState);
+      a.src = clips[i].url;
+      var p = a.play();
+      if (p && p.catch) p.catch(function (e) {
+        if (run === r) ev(r.rec, 'play() REJECTED for note ' + (i + 1) + ': ' + (e && e.name) + ' – ' + (e && e.message));
+      });
+    }
+    play(0);   // synchronously inside the tap
+    r.offsets.forEach(function (off, i) {
+      if (i) r.timers.push(setTimeout(function () { play(i); }, off * 1000));
+    });
+  }
+
+  // Mode B: one WAV with the notes at their offsets, played by one <audio> element.
+  function startContinuous(r) {
+    var parts = [], pos = 0;
+    clips.forEach(function (c, i) {
+      var at = Math.round(r.offsets[i] * SR);
+      fillParts(parts, at - pos, r.rec.noise);
+      parts.push(c.pcm);
+      pos = at + c.pcm.length;
+    });
+    fillParts(parts, 2 * SR, r.rec.noise);
+    var blob = wavBlob(parts);
+    r.url = URL.createObjectURL(blob);
+    r.audio = track;
+    track.hidden = false;
+    track.src = r.url;
+    ev(r.rec, 'stitched track built: ' + mmss((pos + 2 * SR) / SR) + ', ' + (blob.size / 1048576).toFixed(1) + ' MB');
+
+    if ('mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: 'Training notes', artist: 'Nopa', album: 'Playback proof'
+        });
+        navigator.mediaSession.setActionHandler('play', function () { track.play(); });
+        navigator.mediaSession.setActionHandler('pause', function () { track.pause(); });
+      } catch (e) { ev(r.rec, 'mediaSession setup failed: ' + e.message); }
+    } else {
+      ev(r.rec, 'mediaSession not supported');
+    }
+    var p = track.play();
+    if (p && p.catch) p.catch(function (e) {
+      if (run === r) ev(r.rec, 'play() REJECTED: ' + (e && e.name) + ' – ' + (e && e.message));
+    });
+  }
+  // Called on timeupdate and on a timer: has the track reached a note we have not logged yet?
+  function checkTrack() {
+    var r = run;
+    if (!r || r.audio !== track) return;
+    var pos = track.currentTime, now = Date.now();
+    r.offsets.forEach(function (off, i) {
+      if (!r.rec.clips[i] && pos >= off + 0.05) {
+        r.rec.clips[i] = { actual: Math.round(now - (pos - off) * 1000), observed: now };
+        ev(r.rec, 'note ' + (i + 1) + ' reached (track ' + mmss(pos) + '), page ' + document.visibilityState);
+      }
+    });
+    if (!r.rec.beat || now - r.rec.beat.t > 5000) beat(r);
+  }
+  track.addEventListener('timeupdate', checkTrack);
+  setInterval(checkTrack, 1000);
+  ['play', 'pause', 'waiting', 'stalled', 'seeked', 'error'].forEach(function (name) {
+    track.addEventListener(name, function () {
+      if (run && run.audio === track && !track.ended) ev(run.rec, 'track event: ' + name + ' at ' + mmss(track.currentTime));
+    });
+  });
+  track.addEventListener('ended', function () {
+    if (run && run.audio === track) { checkTrack(); finish('track played to the end'); }
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (run) ev(run.rec, 'page became ' + document.visibilityState);
+    else renderLog();
+  });
+
+  // ---------- wire up ----------
+  $('start').addEventListener('click', function () { run ? finish('stopped by user') : start(); });
+  $('clear').addEventListener('click', function () {
+    if (run || !confirm('Delete all logged runs?')) return;
+    runs = []; saveLog(); renderLog();
+  });
+  $('copy').addEventListener('click', function () {
+    var txt = JSON.stringify(runs, null, 1), btn = $('copy');
+    var done = function (ok) { btn.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(function () { btn.textContent = 'Copy log as JSON'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); });
+    else done(false);
+  });
+  if (!window.isSecureContext) $('insecure').hidden = false;
+
+  renderClips(); renderLog(); refreshStart();
+  dbOpen().then(function () {
+    return Promise.all([0, 1, 2].map(function (i) {
+      return dbGet(i).then(function (v) {
+        if (v && v.pcm && !clips[i]) setClipFromPcm(i, new Int16Array(v.pcm), v.src || 'saved');
+      });
+    }));
+  });
+})();
+</script>
+</body>
+</html>
