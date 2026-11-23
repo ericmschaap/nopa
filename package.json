@@ -6,7 +6,7 @@
     "db:start": "supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,mailpit,postgres-meta,supavisor",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
-    "db:test": "node e2e/db.test.mjs",
+    "db:test": "node --test --test-reporter=spec e2e/db.test.mjs",
     "supporter": "node scripts/serve.mjs supporter 8080",
     "athlete:web": "npm run athlete:build-web && node scripts/serve.mjs athlete/dist 8081",
     "test": "cd athlete && npm test",
