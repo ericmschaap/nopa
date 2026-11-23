@@ -11,3 +11,5 @@ Things that need your hands. Each has what to do and why.
       for: the microphone prompt appearing, the preview playing, and the note arriving.
       The page must be served over **HTTPS** (browsers block the microphone on plain http,
       except on localhost).
+- [ ] **Share sheet:** on a corner, tap "Share link" and send it to yourself. The web build
+      used in tests only copies the link, so the native share sheet is unchecked.

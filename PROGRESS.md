@@ -6,8 +6,8 @@
 | --- | --- | --- |
 | 001 | scaffold-and-specs | archived |
 | 002 | supporter-recording | archived |
-| 003 | corners-share-links | in progress |
-| 004 | session-playback | not started |
+| 003 | corners-share-links | archived |
+| 004 | session-playback | in progress |
 | 005 | heard-tracking | not started |
 | 006 | streak | not started |
 

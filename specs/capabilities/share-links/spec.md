@@ -2,7 +2,9 @@
 
 Each corner has one link the athlete sends to their people.
 
-Status: R2–R4 built in change 002 (`supporter/`, `get_corner_by_token`); R1 planned (change 003).
+Status: built. R2–R4 in change 002 (`supporter/`, `get_corner_by_token`), R1 in change 003
+(`athlete/src/screens/CornerScreen.tsx`). Verified by `e2e/supporter.spec.mjs`,
+`e2e/athlete-corners.spec.mjs`, `e2e/db.test.mjs`.
 
 ## Requirements
 
@@ -12,7 +14,8 @@ The system SHALL give every corner an unguessable share link of the form
 
 - GIVEN an athlete who has just created a corner
   WHEN they look at the corner
-  THEN they see its share link and can share or copy it in one tap.
+  THEN they see its share link, can copy it in one tap, and can open the system share
+  sheet with a short invitation that contains the link.
 
 ### R2 — The link opens the corner for anyone, no account
 The system SHALL show the corner's goal name and finish date to anyone who opens the link in
