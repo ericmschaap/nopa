@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, Share, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { listNotes, type NoteRow } from '../lib/api';
+import { getCornerStreak, listNotes, type NoteRow } from '../lib/api';
 import { config } from '../lib/config';
 import { daysUntil, formatDate, formatDateTime, shareLink, type Corner } from '../lib/corner';
 import { heardOutbox } from '../lib/heard';
 import { DURATION_CHOICES_MIN } from '../lib/schedule';
+import { streakLines, type Streak } from '../lib/streak';
 import { Body, Button, Card, ErrorText, Title } from '../ui/kit';
 import { useTheme } from '../ui/theme';
 
@@ -26,6 +27,7 @@ export function CornerScreen(props: {
   const [notes, setNotes] = useState<NoteRow[] | null>(null);
   /** Heard on this phone, mark not yet on the server. */
   const [pendingHeard, setPendingHeard] = useState<string[]>([]);
+  const [streak, setStreak] = useState<Streak | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [minutes, setMinutes] = useState(45);
   const [starting, setStarting] = useState(false);
@@ -36,8 +38,10 @@ export function CornerScreen(props: {
     try {
       await heardOutbox.flush();
       const pending = await heardOutbox.pendingIds();
-      setNotes(await listNotes(corner.id));
+      const [list, shared] = await Promise.all([listNotes(corner.id), getCornerStreak(corner.id)]);
+      setNotes(list);
       setPendingHeard(pending);
+      setStreak(shared);
     } catch {
       setLoadError(true);
     }
@@ -79,6 +83,13 @@ export function CornerScreen(props: {
         {formatDate(corner.finish_date)}
         {days > 0 ? ` · ${days} ${days === 1 ? 'day' : 'days'} to go` : days === 0 ? ' · today' : ''}
       </Body>
+
+      {streak ? (
+        <View testID="streak" style={{ backgroundColor: t.soft, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, marginTop: 14 }}>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: t.ink }}>{streakLines(streak).headline}</Text>
+          <Text style={{ fontSize: 15, color: t.muted, marginTop: 2 }}>{streakLines(streak).detail}</Text>
+        </View>
+      ) : null}
 
       <Card>
         {notes === null && !loadError ? <ActivityIndicator accessibilityLabel="Loading notes" color={t.accent} /> : null}

@@ -1,4 +1,5 @@
 import type { Corner } from './corner';
+import type { Streak } from './streak';
 import { supabase } from './supabase';
 
 const CORNER_COLUMNS = 'id, name, finish_date, share_token, created_at';
@@ -47,4 +48,12 @@ export async function signedAudioUrls(paths: string[]): Promise<string[]> {
     if (d.error || !d.signedUrl) throw new Error('could not sign audio url');
     return d.signedUrl;
   });
+}
+
+/** The shared streak of one of the athlete's corners. */
+export async function getCornerStreak(cornerId: string): Promise<Streak> {
+  const { data, error } = await supabase.rpc('my_corner_streaks');
+  if (error) throw error;
+  const row = (data as { corner_id: string; streak_weeks: number; this_week_kept: boolean }[]).find((r) => r.corner_id === cornerId);
+  return { streakWeeks: row?.streak_weeks ?? 0, thisWeekKept: row?.this_week_kept ?? false };
 }
