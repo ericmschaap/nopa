@@ -1,5 +1,11 @@
 # Progress
 
+All six changes are built, verified and archived. The loop works end to end against a local
+Supabase stack: a supporter records from a share link, the athlete's session plays the note
+at its spaced time, the note is marked heard, and the corner streak updates.
+
+Test status at the last run: 30 unit, 30 database, 28 end-to-end, all passing.
+
 ## Changes
 
 | # | Change | Status |
