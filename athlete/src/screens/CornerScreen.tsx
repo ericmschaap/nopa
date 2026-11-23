@@ -3,7 +3,8 @@ import { ActivityIndicator, Platform, Pressable, Share, Text, View } from 'react
 import * as Clipboard from 'expo-clipboard';
 import { listNotes, type NoteRow } from '../lib/api';
 import { config } from '../lib/config';
-import { daysUntil, formatDate, shareLink, type Corner } from '../lib/corner';
+import { daysUntil, formatDate, formatDateTime, shareLink, type Corner } from '../lib/corner';
+import { heardOutbox } from '../lib/heard';
 import { DURATION_CHOICES_MIN } from '../lib/schedule';
 import { Body, Button, Card, ErrorText, Title } from '../ui/kit';
 import { useTheme } from '../ui/theme';
@@ -23,6 +24,8 @@ export function CornerScreen(props: {
   const days = daysUntil(corner.finish_date);
   const [copied, setCopied] = useState(false);
   const [notes, setNotes] = useState<NoteRow[] | null>(null);
+  /** Heard on this phone, mark not yet on the server. */
+  const [pendingHeard, setPendingHeard] = useState<string[]>([]);
   const [loadError, setLoadError] = useState(false);
   const [minutes, setMinutes] = useState(45);
   const [starting, setStarting] = useState(false);
@@ -31,14 +34,19 @@ export function CornerScreen(props: {
   const refresh = useCallback(async () => {
     setLoadError(false);
     try {
+      await heardOutbox.flush();
+      const pending = await heardOutbox.pendingIds();
       setNotes(await listNotes(corner.id));
+      setPendingHeard(pending);
     } catch {
       setLoadError(true);
     }
   }, [corner.id]);
   useEffect(() => { void refresh(); }, [refresh]);
 
-  const waiting = (notes ?? []).filter((n) => n.heard_at === null);
+  const isHeard = (n: NoteRow) => n.heard_at !== null || pendingHeard.includes(n.id);
+  const waiting = (notes ?? []).filter((n) => !isHeard(n));
+  const heard = (notes ?? []).filter(isHeard).sort((a, b) => (b.heard_at ?? '9').localeCompare(a.heard_at ?? '9'));
 
   async function start() {
     setStartError(null);
@@ -128,6 +136,22 @@ export function CornerScreen(props: {
         <Button label="Share link" kind="primary" onPress={share} />
         <Button label={copied ? 'Copied' : 'Copy link'} onPress={copy} />
       </Card>
+
+      {heard.length > 0 ? (
+        <Card>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: t.ink, marginBottom: 6 }}>
+            {heard.length === 1 ? '1 note heard' : `${heard.length} notes heard`}
+          </Text>
+          {heard.map((n) => (
+            <View key={n.id} testID="heard-note" style={{ paddingVertical: 8, borderTopWidth: 1, borderTopColor: t.line }}>
+              <Text style={{ fontSize: 17, fontWeight: '600', color: t.ink }}>{n.sender_name}</Text>
+              <Text style={{ fontSize: 15, color: t.muted }}>
+                {n.heard_at ? `Heard ${formatDateTime(n.heard_at)}` : 'Heard just now'}
+              </Text>
+            </View>
+          ))}
+        </Card>
+      ) : null}
     </View>
   );
 }

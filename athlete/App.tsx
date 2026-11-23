@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { listCorners, type NoteRow } from './src/lib/api';
 import { createSessionAudio } from './src/lib/audio';
 import { downloadNotes } from './src/lib/download';
+import { heardOutbox } from './src/lib/heard';
 import { Session, type SessionState } from './src/lib/session';
 import { SessionScreen } from './src/screens/SessionScreen';
 import { isConfigured } from './src/lib/config';
@@ -35,6 +36,10 @@ export default function App() {
       durationMs: minutes * 60_000,
       audio: createSessionAudio(corner.name),
       onChange: setSessionState,
+      // Saved on the phone first, then sent; a mark made with no signal goes out later.
+      onNotePlayed: (note, finishedAt) => {
+        void heardOutbox.add(note.id, finishedAt).then(() => heardOutbox.flush());
+      },
     });
     setSessionState(session.getState());
     await session.start();
@@ -45,6 +50,7 @@ export default function App() {
     setState('loading');
     try {
       await ensureSignedIn();
+      void heardOutbox.flush(); // anything heard last time without signal
       setCorners(await listCorners());
       setState('ready');
     } catch {

@@ -54,6 +54,12 @@ export function formatDate(iso: string): string {
   return `${d} ${MONTHS[m - 1]} ${y}`;
 }
 
+/** ISO timestamp -> "23 November, 14:05" in the phone's time zone. */
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 /** Whole days from today until the finish date (0 on the day, negative after). */
 export function daysUntil(iso: string, today: Date = new Date()): number {
   const [y, m, d] = iso.split('-').map(Number);
