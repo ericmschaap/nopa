@@ -2,14 +2,8 @@
 // web build.
 import { expect, test } from '@playwright/test';
 import { ATHLETE_URL, SUPPORTER_URL } from './local.mjs';
+import { createCorner } from './ui.mjs';
 
-export async function createCorner(page, name, [day, month, year]) {
-  await page.getByLabel('Your goal').fill(name);
-  await page.getByLabel('Day').fill(day);
-  await page.getByLabel('Month').fill(month);
-  await page.getByLabel('Year').fill(year);
-  await page.getByRole('button', { name: 'Create corner' }).click();
-}
 
 test('corners R2: a fresh install lands in the app with no login', async ({ page }) => {
   await page.goto(ATHLETE_URL);
