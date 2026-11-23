@@ -107,3 +107,62 @@ describe('recording: sending a note with no account', () => {
     assert.ok(!r.ok || r.json.length === 0);
   });
 });
+
+describe('corners: athlete access', () => {
+  const asAthlete = (a) => ({ token: a.token });
+  const create = (a, body) =>
+    api('/rest/v1/corners', { ...asAthlete(a), method: 'POST', body, headers: { prefer: 'return=representation' } });
+
+  test('R1 + share-links R1: an athlete creates a corner and gets a share token', async () => {
+    const a = await newAthlete();
+    const r = await create(a, { name: 'Berlin Marathon', finish_date: '2027-09-26' });
+    assert.equal(r.status, 201);
+    assert.equal(r.json[0].owner_id, a.id);
+    assert.match(r.json[0].share_token, /^[0-9a-f]{20}$/);
+    const viaLink = await rpc('get_corner_by_token', { p_token: r.json[0].share_token });
+    assert.equal(viaLink.json[0].name, 'Berlin Marathon');
+  });
+
+  test('R1: no name, no date or a past date creates nothing', async () => {
+    const a = await newAthlete();
+    assert.equal((await create(a, { name: '  ', finish_date: '2027-09-26' })).ok, false);
+    assert.equal((await create(a, { name: 'Goal' })).ok, false);
+    assert.equal((await create(a, { name: 'Goal', finish_date: '2020-01-01' })).ok, false);
+    assert.deepEqual((await api('/rest/v1/corners', asAthlete(a))).json, []);
+  });
+
+  test('R1: an athlete cannot create a corner for someone else, and anon cannot create one', async () => {
+    const [a, b] = [await newAthlete(), await newAthlete()];
+    assert.equal((await create(a, { name: 'Goal', finish_date: '2027-09-26', owner_id: b.id })).ok, false);
+    assert.equal((await api('/rest/v1/corners', { method: 'POST', body: { name: 'Goal', finish_date: '2027-09-26' } })).ok, false);
+  });
+
+  test('R3: several corners per athlete; each athlete sees only their own corners and notes', async () => {
+    const [a, b] = [await newAthlete(), await newAthlete()];
+    const marathon = (await create(a, { name: 'Marathon', finish_date: '2027-09-26' })).json[0];
+    const triathlon = (await create(a, { name: 'Triathlon', finish_date: '2027-07-01' })).json[0];
+    const other = (await create(b, { name: 'Ultra', finish_date: '2027-10-01' })).json[0];
+    assert.notEqual(marathon.share_token, triathlon.share_token);
+    await sendNote(marathon, 'Anna');
+    await sendNote(other, 'Ben');
+
+    const cornersA = (await api('/rest/v1/corners?order=name', asAthlete(a))).json;
+    assert.deepEqual(cornersA.map((c) => c.name), ['Marathon', 'Triathlon']);
+    const notesA = (await api('/rest/v1/notes?select=sender_name', asAthlete(a))).json;
+    assert.deepEqual(notesA.map((n) => n.sender_name), ['Anna']);
+    const notesB = (await api('/rest/v1/notes?select=sender_name', asAthlete(b))).json;
+    assert.deepEqual(notesB.map((n) => n.sender_name), ['Ben']);
+  });
+
+  test('recording R4: the athlete cannot read a supporter contact', async () => {
+    const a = await newAthlete();
+    const corner = (await create(a, { name: 'Marathon', finish_date: '2027-09-26' })).json[0];
+    const id = await sendNote(corner, 'Anna');
+    await rpc('add_note_contact', { p_note_id: id, p_contact: 'anna@example.com' });
+    const contacts = await api('/rest/v1/note_contacts?select=*', asAthlete(a));
+    assert.ok(!contacts.ok || contacts.json.length === 0);
+    const notes = (await api('/rest/v1/notes?select=*', asAthlete(a))).json;
+    assert.equal(notes.length, 1);
+    assert.ok(!JSON.stringify(notes).includes('anna@example.com'));
+  });
+});
