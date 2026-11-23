@@ -68,7 +68,7 @@ Why these (the brief suggested them; nothing better was found):
   small set of SQL functions granted to `anon`, plus upload into the notes bucket.
 - **Share link format:** `<SUPPORTER_URL>/?c=<share_token>`. The token is random and is the
   only thing a supporter needs.
-- **Audio format:** notes are stored as mono 16 kHz 16-bit WAV, converted in the supporter's
+- **Audio format:** notes are stored as mono 22.05 kHz 16-bit WAV, converted in the supporter's
   browser before upload, so every phone can play them without server transcoding.
 - **Note length:** at most 60 seconds.
 - **Weeks:** ISO weeks, Monday to Sunday, in UTC.
