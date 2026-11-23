@@ -9,7 +9,7 @@ test('local Supabase answers', async ({ request }) => {
 
 test('supporter page is served', async ({ page }) => {
   await page.goto(SUPPORTER_URL);
-  await expect(page.getByRole('heading', { name: 'Nopa' })).toBeVisible();
+  await expect(page.getByText('nopa', { exact: true })).toBeVisible();
 });
 
 test('athlete app boots', async ({ page }) => {

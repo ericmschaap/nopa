@@ -11,6 +11,7 @@ export default defineConfig({
   reporter: 'list',
   use: {
     trace: 'off',
+    locale: 'en-GB',
     permissions: ['microphone', 'clipboard-read', 'clipboard-write'],
     launchOptions: {
       // A fake microphone (a steady beep) so the supporter page can really record.
