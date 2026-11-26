@@ -2,205 +2,185 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Jost:wght@300;400;500&display=swap">
 <style>
-  /* Layout: a studio timetable. One quiet column, serif for names and moments, a light sans for the rest. */
+  /* Layout: a calendar and little else. Dots under a day are messages waiting there. */
   :root {
-    --paper: #f6f1e7; --ink: #2d2c27; --pencil: #7f7b70; --rule: #e2dccf; --sage: #6c7a60; --wash: #e8e9da; --red: #9c4a38;
-    --hand: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-    --text: "Jost", "Avenir Next", "Century Gothic", system-ui, sans-serif;
+    --paper: #f7f4ec; --ink: #2d2c27; --pencil: #85817a; --rule: #e3ded2; --sage: #6c7a60; --red: #9c4a38;
+    --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --sans: "Jost", "Avenir Next", "Century Gothic", system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --paper: #1e1d19; --ink: #efebe2; --pencil: #a8a396; --rule: #3a3832; --sage: #adbaa0; --wash: #2a2c24; --red: #e0937f; color-scheme: dark; }
+    :root:not([data-theme="light"]) { --paper: #1e1d19; --ink: #efebe2; --pencil: #a8a396; --rule: #3a3832; --sage: #adbaa0; --red: #e0937f; color-scheme: dark; }
   }
-  :root[data-theme="dark"] { --paper: #1e1d19; --ink: #efebe2; --pencil: #a8a396; --rule: #3a3832; --sage: #adbaa0; --wash: #2a2c24; --red: #e0937f; color-scheme: dark; }
+  :root[data-theme="dark"] { --paper: #1e1d19; --ink: #efebe2; --pencil: #a8a396; --rule: #3a3832; --sage: #adbaa0; --red: #e0937f; color-scheme: dark; }
   * { box-sizing: border-box; }
   body {
-    background: var(--paper); color: var(--ink); font: 400 17px/1.55 var(--text);
-    padding-block: 22px 64px;
-    padding-left: max(26px, env(safe-area-inset-left, 0px));
-    padding-right: max(26px, env(safe-area-inset-right, 0px));
+    background: var(--paper); color: var(--ink); font: 400 17px/1.5 var(--sans);
+    padding-block: 20px 56px;
+    padding-left: max(22px, env(safe-area-inset-left, 0px));
+    padding-right: max(22px, env(safe-area-inset-right, 0px));
   }
-  main { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; position: relative; }
-  /* a soft patch of light behind the title, like sun on a studio wall */
-  main::before { content: ""; position: absolute; top: -70px; right: -110px; width: 320px; height: 320px; border-radius: 50%;
-    background: radial-gradient(closest-side, var(--wash), transparent); pointer-events: none; }
-  main > * { position: relative; }
-  .voice { font: italic 400 1.4rem/1.3 var(--hand); text-wrap: pretty; }
-  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--pencil); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; }
-  .top b { font: italic 400 1.7rem/1 var(--hand); color: var(--ink); letter-spacing: 0; text-transform: none; }
-  section.view { display: flex; flex-direction: column; gap: 30px; }
-  h1 { font: 400 2.9rem/1.02 var(--hand); letter-spacing: -.01em; margin: 0; text-wrap: balance; }
-  h2 { font: 500 .78rem/1.4 var(--text); letter-spacing: .16em; text-transform: uppercase; color: var(--pencil); margin: 0; text-wrap: balance; }
+  main { max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+  section.view { display: flex; flex-direction: column; gap: 26px; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; color: var(--pencil); font-size: .95rem; }
+  .top b { font: italic 400 1.6rem/1 var(--serif); color: var(--ink); }
+  h1 { font: 400 2.5rem/1.05 var(--serif); margin: 0; text-wrap: balance; }
   p { margin: 0; }
   .soft { color: var(--pencil); }
-  .group { display: flex; flex-direction: column; gap: 12px; }
+  .group { display: flex; flex-direction: column; gap: 10px; }
   button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
-  .btn {
-    display: block; width: 100%; min-height: 54px; padding: 12px 22px; text-align: center; font-size: 1rem; letter-spacing: .03em;
-    border: 1px solid var(--ink); border-radius: 999px;
-  }
-  .btn.main { background: var(--ink); color: var(--paper); min-height: 60px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; font-size: .92rem; }
+  .btn { display: block; width: 100%; min-height: 54px; padding: 12px 18px; text-align: center; border: 1px solid var(--ink); border-radius: 12px; }
+  .btn.main { background: var(--ink); color: var(--paper); font-weight: 500; }
   .btn.main.red { background: var(--red); border-color: var(--red); }
   .btn:disabled { opacity: .45; cursor: default; }
-  .txt { font-size: .92rem; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; text-decoration-color: var(--rule); min-height: 44px; }
-  .txt.soft { color: var(--pencil); }
-  .top .txt { font-size: inherit; letter-spacing: inherit; text-transform: inherit; text-decoration: none; }
-  button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 1px solid var(--sage); outline-offset: 4px; }
-  /* the plan, set like a timetable */
-  .plan { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
-  .row { display: flex; flex-direction: column; gap: 2px; padding: 18px 0; border-bottom: 1px solid var(--rule); width: 100%; }
-  .row .day { font-size: .74rem; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--sage); }
-  .row .what { font: 400 1.55rem/1.2 var(--hand); min-width: 0; }
-  .row .mark { color: var(--pencil); font-size: .92rem; font-weight: 300; }
-  .row.next { background: var(--wash); border: 0; border-radius: 28px; padding: 24px 24px 26px; margin: 4px 0 10px; gap: 6px; }
-  .row.next .what { font-size: 2.3rem; line-height: 1.05; }
-  .row.next .go { margin-top: 12px; font-size: .78rem; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; }
-  .dots { display: inline-flex; gap: 4px; margin-right: 8px; vertical-align: middle; }
-  .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); }
-  .row.done .day, .row.done .what { color: var(--pencil); }
-  .row.done .what { font-style: italic; }
-  label { display: block; color: var(--pencil); font-size: .78rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
-  input[type=text], textarea, select {
-    font: 400 1.35rem/1.3 var(--hand); color: var(--ink); width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--ink);
-    border-radius: 0; padding: 8px 0; min-height: 48px;
-  }
-  textarea { min-height: 130px; resize: vertical; }
-  ::placeholder { color: var(--pencil); opacity: .7; font-style: italic; }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .txt { color: var(--pencil); font-size: .95rem; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--rule); min-height: 44px; }
+  .top .txt { text-decoration: none; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 1px solid var(--sage); outline-offset: 3px; }
+
+  /* weeks side by side: one dot per week */
+  .together { display: flex; flex-direction: column; gap: 6px; }
+  .weeks { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+  .weeks i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--sage); }
+  .weeks i.on { background: var(--sage); }
+  .together b { font: 400 1.6rem/1.15 var(--serif); }
+
+  /* the calendar */
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; }
+  .cal .mo { grid-column: 1 / -1; color: var(--pencil); font-size: .95rem; padding-bottom: 10px; }
+  .cal .wd { text-align: center; font-size: .78rem; color: var(--pencil); padding-bottom: 6px; }
+  .cal .d { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0 4px; min-height: 58px; color: var(--pencil); }
+  .cal .d .n { width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 50%; font-size: 1rem; }
+  .cal .d.has { color: var(--ink); }
+  .cal .d.has .n { font-weight: 500; }
+  .cal .d.today .n { box-shadow: inset 0 0 0 1px var(--ink); }
+  .cal .d.sel .n { background: var(--ink); color: var(--paper); }
+  .cal .d.past { opacity: .4; }
+  .cal .m { display: flex; gap: 3px; height: 8px; align-items: center; }
+  .cal .m i { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); }
+  .cal .m i.none { background: none; box-shadow: inset 0 0 0 1.2px var(--pencil); }
+  .cal .m i.heard { background: var(--rule); }
+  .cal .m span { font-size: .7rem; line-height: 8px; color: var(--sage); }
+  .legend { display: flex; gap: 16px; font-size: .85rem; color: var(--pencil); align-items: center; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--sage); margin-right: 6px; vertical-align: middle; }
+  .legend i.none { background: none; box-shadow: inset 0 0 0 1.2px var(--pencil); }
+
+  .day { border-top: 1px solid var(--rule); padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .day b { font: 400 1.6rem/1.15 var(--serif); display: block; }
+  .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kinds .btn { min-height: 46px; padding: 8px 4px; font-size: .95rem; }
+
+  label { display: block; color: var(--pencil); font-size: .95rem; margin-bottom: 2px; }
+  input[type=text], textarea, select { font: inherit; color: var(--ink); width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--ink); border-radius: 0; padding: 8px 0; min-height: 46px; }
+  textarea { min-height: 120px; resize: vertical; }
+  ::placeholder { color: var(--pencil); opacity: .7; }
   audio { width: 100%; }
   .oops { color: var(--red); }
-  .timer { font: 400 3.2rem/1 var(--hand); text-align: center; font-variant-numeric: tabular-nums; }
-  .stage { text-align: center; padding: 52px 22px; display: flex; flex-direction: column; gap: 12px; background: var(--wash); border-radius: 32px; position: relative; overflow: hidden; }
-  .stage > * { position: relative; }
-  /* someone is with you: one slow breath behind their name */
-  .stage.with::before { content: ""; position: absolute; left: 50%; top: 50%; width: 240px; height: 240px; margin: -120px 0 0 -120px; border-radius: 50%;
-    background: var(--paper); opacity: .55; animation: breathe 6s ease-in-out infinite; }
-  @keyframes breathe { 0%, 100% { transform: scale(.82); } 50% { transform: scale(1.12); } }
-  @media (prefers-reduced-motion: reduce) { .stage.with::before { animation: none; } }
+  .timer { font: 400 3rem/1 var(--serif); text-align: center; font-variant-numeric: tabular-nums; }
   .week { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
-  .week > div { display: grid; grid-template-columns: 3.2em 1fr 6.2em; gap: 12px; align-items: center; border-bottom: 1px solid var(--rule); min-height: 56px; }
-  .week span { font-size: .74rem; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--sage); }
-  .week select { border: 0; font-size: 1.2rem; min-height: 44px; }
-  .week select.rest { color: var(--pencil); font-style: italic; }
-  .stage .soft { font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; }
-  .stage .name { font: italic 400 4.2rem/1 var(--hand); }
-  .stage .calm { font: 400 2.7rem/1.05 var(--hand); text-wrap: balance; }
-  .stage .said { font: italic 400 1.3rem/1.35 var(--hand); text-transform: none; letter-spacing: 0; }
-  /* the session as a line, with a small ring where each note falls */
-  .line { position: relative; height: 22px; margin: 0 7px; }
+  .week > div { display: grid; grid-template-columns: 3em 1fr 5.6em; gap: 12px; align-items: center; border-bottom: 1px solid var(--rule); min-height: 54px; }
+  .week span { color: var(--pencil); font-size: .95rem; }
+  .week select { border: 0; min-height: 44px; }
+  .week select.rest { color: var(--pencil); }
+
+  .stage { text-align: center; padding-block: 56px 40px; display: flex; flex-direction: column; gap: 10px; }
+  .stage .name { font: italic 400 4rem/1 var(--serif); }
+  .stage .calm { font: 400 2.4rem/1.1 var(--serif); text-wrap: balance; }
+  .stage .said { font: italic 400 1.25rem/1.35 var(--serif); }
+  .line { position: relative; height: 22px; margin: 0 6px; }
   .line::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; border-top: 1px solid var(--rule); }
   .line .gone { position: absolute; left: 0; top: 10px; border-top: 1px solid var(--ink); }
-  .line .dot { position: absolute; top: 5px; width: 11px; height: 11px; margin-left: -5.5px; border-radius: 50%; background: var(--paper); border: 1px solid var(--ink); }
-  .line .dot.heard { background: var(--sage); border-color: var(--sage); }
-  .ends { display: flex; justify-content: space-between; color: var(--pencil); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; margin: 6px 7px 0; }
-  .foot { color: var(--pencil); font-size: .82rem; font-weight: 300; text-align: center; border-top: 1px solid var(--rule); padding-top: 20px; }
+  .line .dot { position: absolute; top: 6px; width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; background: var(--sage); }
+  .line .dot.heard { background: var(--rule); }
+  .foot { color: var(--pencil); font-size: .85rem; text-align: center; border-top: 1px solid var(--rule); padding-top: 18px; }
 </style>
 
 <main>
   <div class="top">
     <b>nopa</b>
-    <span class="who-holds" id="holds">
-      <button class="txt" id="side-athlete">you</button> · <button class="txt" id="side-supporter">a friend</button>
-    </span>
+    <span id="holds"><button class="txt" id="side-athlete">you</button> · <button class="txt" id="side-supporter">a friend</button></span>
   </div>
 
-  <!-- ATHLETE: the plan -->
+  <!-- YOU: calendar -->
   <section class="view" id="v-home">
     <div class="group">
       <h1 id="h-name"></h1>
       <p class="soft" id="h-date"></p>
     </div>
-    <p class="voice" id="h-streak"></p>
+    <div class="together" id="h-together"></div>
     <div class="group">
-      <h2>Your plan</h2>
-      <div class="plan" id="h-plan"></div>
-      <button class="txt soft" id="h-add">set up your plan</button>
+      <div class="cal" id="h-cal"></div>
+      <div class="legend"><span><i></i>a message waiting</span><span><i class="none"></i>no one yet</span></div>
     </div>
+    <div class="day" id="h-day"></div>
     <div class="group">
-      <button class="btn" id="h-share">Share your plan with your people</button>
-      <p class="soft">They pick the session they want to be there for.</p>
+      <button class="btn" id="h-share">Send your link</button>
+      <button class="txt" id="h-week" style="align-self:center">set your usual week</button>
+      <button class="txt" id="h-new" style="align-self:center">start over with your own goal</button>
     </div>
-    <button class="txt soft" id="h-new">start over with your own goal</button>
   </section>
 
-  <!-- ATHLETE: one session -->
-  <section class="view" id="v-ready" hidden>
-    <button class="txt soft" id="r-back">back to the plan</button>
-    <div class="group">
-      <h1 id="r-what"></h1>
-      <p class="soft" id="r-when"></p>
-    </div>
-    <p id="r-notes"></p>
-    <button class="btn main" id="r-start">Start</button>
-    <p class="soft" id="r-hint"></p>
-  </section>
-
-  <!-- ATHLETE: set up the plan -->
+  <!-- YOU: usual week -->
   <section class="view" id="v-add" hidden>
-    <button class="txt soft" id="a-cancel">back to the plan</button>
+    <button class="txt" id="a-cancel">back</button>
     <div class="group">
-      <h1>Your plan</h1>
-      <p class="soft">Nothing fancy. Which days do you usually train, and what kind of day is it?</p>
+      <h1>Your usual week</h1>
+      <p class="soft">Which days do you train, and what kind of day is it? It fills your calendar up to your big day. You can still change any single day by tapping it.</p>
     </div>
-    <div class="group">
-      <h2>A usual week</h2>
-      <div class="week" id="a-week"></div>
-      <p class="soft">It repeats every week until your finish day.</p>
-      <button class="btn" id="a-save">Use this week</button>
-    </div>
+    <div class="week" id="a-week"></div>
     <p class="oops" id="a-oops" role="alert" hidden></p>
+    <button class="btn main" id="a-save">Fill my calendar</button>
   </section>
 
-  <!-- ATHLETE: new goal -->
+  <!-- YOU: goal -->
   <section class="view" id="v-goal" hidden>
-    <h1>Your goal</h1>
-    <div><label for="g-name">What are you working towards?</label><input type="text" id="g-name" maxlength="60" placeholder="A first 10K, a mountain, a long ride…"></div>
-    <div><label for="g-when">The day you finish</label><input type="text" id="g-when" inputmode="numeric" placeholder="14/06/2027"></div>
+    <h1>What are you working towards?</h1>
+    <div><label for="g-who">Your first name</label><input type="text" id="g-who" maxlength="30" autocomplete="given-name"></div>
+    <div><label for="g-name">Your goal</label><input type="text" id="g-name" maxlength="60" placeholder="A first 10K, a mountain, a long ride…"></div>
+    <div><label for="g-when">The day</label><input type="text" id="g-when" inputmode="numeric" placeholder="14/06/2027"></div>
     <p class="oops" id="g-oops" role="alert" hidden></p>
-    <button class="btn" id="g-save">Begin</button>
-    <button class="txt soft" id="g-cancel">never mind</button>
+    <button class="btn main" id="g-save">Begin</button>
+    <button class="txt" id="g-cancel" style="align-self:center">never mind</button>
   </section>
 
-  <!-- ATHLETE: during -->
+  <!-- YOU: during -->
   <section class="view" id="v-session" hidden>
     <p class="soft" id="s-what"></p>
     <div class="stage" id="s-stage"></div>
-    <div>
-      <div class="line" id="s-line"></div>
-      <div class="ends"><span>start</span><span id="s-end"></span></div>
-    </div>
-    <button class="txt soft" id="s-stop" style="align-self:center">end the session</button>
-    <p class="soft" style="text-align:center">The demo runs the whole session in one minute. In the real app the phone is locked in your pocket and your own music carries on underneath.</p>
+    <div class="line" id="s-line"></div>
+    <button class="txt" id="s-stop" style="align-self:center">end the session</button>
+    <p class="soft" style="text-align:center;font-size:.9rem">The demo plays the whole session in one minute. For real, the phone is locked in your pocket and your own music carries on underneath.</p>
   </section>
 
-  <!-- ATHLETE: after -->
+  <!-- YOU: after -->
   <section class="view" id="v-after" hidden>
     <h1 id="f-title"></h1>
     <p id="f-line"></p>
-    <button class="btn" id="f-ok">Back to the plan</button>
+    <button class="btn main" id="f-ok">Back to the calendar</button>
   </section>
 
-  <!-- FRIEND: pick a session -->
+  <!-- FRIEND: calendar -->
   <section class="view" id="v-pick" hidden>
     <div class="group">
-      <p class="soft">You're invited along on the way to</p>
+      <p class="soft" id="p-who"></p>
       <h1 id="p-name"></h1>
       <p class="soft" id="p-date"></p>
     </div>
-    <p class="voice" id="p-streak"></p>
+    <div class="together" id="p-together"></div>
     <div class="group">
-      <h2>Choose a session to be there for</h2>
-      <div class="plan" id="p-plan"></div>
+      <p id="p-ask"></p>
+      <div class="cal" id="p-cal"></div>
+      <div class="legend"><span><i></i>someone is there</span><span><i class="none"></i>no one yet</span></div>
     </div>
+    <div class="day" id="p-day"></div>
+    <button class="btn" id="p-any">Or any time</button>
   </section>
 
-  <!-- FRIEND: leave the note -->
+  <!-- FRIEND: the message -->
   <section class="view" id="v-note" hidden>
-    <button class="txt soft" id="n-back">choose another session</button>
+    <button class="txt" id="n-back">back to the calendar</button>
     <div class="group">
       <h1 id="n-for"></h1>
       <p class="soft">Say hello, share a memory, anything you'd say if you were alongside. Up to a minute.</p>
     </div>
-
     <div class="group" id="n-record">
       <div class="timer" id="n-timer" hidden>0:00</div>
       <button class="btn main" id="n-rec">Record</button>
@@ -212,18 +192,17 @@
       </div>
       <p class="oops" id="n-rec-oops" role="alert" hidden></p>
     </div>
-
     <div class="group" id="n-review" hidden style="gap:18px">
       <audio id="n-preview" controls hidden></audio>
       <div id="n-text-wrap" hidden>
         <label for="n-text">What would you say?</label>
         <textarea id="n-text" maxlength="400" placeholder="Hey, it's me…"></textarea>
-        <p class="soft">In the demo a written note is read out by a computer voice.</p>
+        <p class="soft" style="font-size:.9rem">In the demo a written message is read out by a computer voice.</p>
       </div>
       <div><label for="n-first">Your first name</label><input type="text" id="n-first" maxlength="40" autocomplete="given-name"></div>
       <p class="oops" id="n-send-oops" role="alert" hidden></p>
       <button class="btn main" id="n-send">Send</button>
-      <button class="txt soft" id="n-redo" style="align-self:center">start again</button>
+      <button class="txt" id="n-redo" style="align-self:center">start again</button>
     </div>
   </section>
 
@@ -232,18 +211,18 @@
     <h1>Thank you</h1>
     <p id="t-line"></p>
     <div class="group" id="t-ask" style="gap:14px">
-      <div><label for="t-contact">Want to know when they've heard it? Leave an email or number.</label><input type="text" id="t-contact" maxlength="200" placeholder="optional"></div>
+      <div><label for="t-contact" id="t-contact-label"></label><input type="text" id="t-contact" maxlength="200" placeholder="email or phone, if you like"></div>
       <button class="btn" id="t-save">Let me know</button>
-      <button class="txt soft" id="t-skip" style="align-self:center">no thanks</button>
+      <button class="txt" id="t-skip" style="align-self:center">no thanks</button>
     </div>
     <p id="t-done" hidden></p>
     <div class="group" id="t-next" hidden>
-      <button class="btn" id="t-another">Leave another note</button>
-      <button class="txt soft" id="t-athlete" style="align-self:center">see it from the other side</button>
+      <button class="btn" id="t-another">Back to the calendar</button>
+      <button class="txt" id="t-athlete" style="align-self:center">see it from the other side</button>
     </div>
   </section>
 
-  <p class="foot">A demo. Everything stays on this page and is gone when you reload. Anna, Ben and Mum are examples.</p>
+  <p class="foot">A demo. Everything stays on this page and is gone when you reload. Sam, Anna, Ben and Mum are examples.</p>
 </main>
 
 <audio id="note-audio" playsinline></audio>
@@ -252,15 +231,17 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var DAY = 864e5, WEEK = 7 * DAY, DEMO_MS = 60000;
+  var DAY = 864e5, WEEK = 7 * DAY, DEMO_MS = 60000, SPAN = 35;
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   var VOICES = ['buttery', 'airy', 'glassy', 'rounded'];
   var LENGTHS = [20, 30, 45, 60, 75, 90, 120, 180];
-  var TITLES = { Easy: 'An easy one', Hard: 'A hard one', Long: 'A long one' };
-  function title(s) { return TITLES[s.what] || s.what; }
-  function short(s) { return (TITLES[s.what] || s.what).replace(/^An? /, ''); }
-  // A moment of silence, played on Start so later notes may play without another tap.
+  var KINDS = ['Easy', 'Hard', 'Long'];
+  var TITLES = { Easy: 'an easy one', Hard: 'a hard one', Long: 'a long one' };
+  var USUAL = { Easy: 30, Hard: 45, Long: 75 };
+  function short(s) { return TITLES[s.what].replace(/^an? /, ''); }
+  // A moment of silence, played on Start so later messages may play without another tap.
   var SILENCE = (function () {
     var n = 2400, b = new Uint8Array(44 + n), v = new DataView(b.buffer), s = function (o, t) { for (var i = 0; i < t.length; i++) b[o + i] = t.charCodeAt(i); };
     s(0, 'RIFF'); v.setUint32(4, 36 + n, true); s(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
@@ -269,65 +250,105 @@
     return URL.createObjectURL(new Blob([b], { type: 'audio/wav' }));
   })();
 
-  var now = Date.now();
-  var state = {
-    side: 'athlete', view: 'home', openId: null, pickId: null,
-    goal: { name: 'My first 10K', finish: '2027-06-13' },
-    sessions: [
-      { id: 1, what: 'Easy', inDays: 0, minutes: 30, done: false, heard: [] },
-      { id: 2, what: 'Hard', inDays: 2, minutes: 45, done: false, heard: [] },
-      { id: 3, what: 'Long', inDays: 4, minutes: 75, done: false, heard: [] },
-    ],
-    notes: [
-      { id: 1, sender: 'Ben', sessionId: 1, createdAt: now - WEEK, heardAt: null,
-        text: "Ben here. Nice and easy today, no heroics. I'll have the coffee on when you're back." },
-      { id: 2, sender: 'Anna', sessionId: 3, createdAt: now - 2 * WEEK, heardAt: null,
-        text: "Hey, it's Anna. I know the long ones get quiet in the middle. Remember that first walk around the block in the rain? Look how far you've come." },
-      { id: 3, sender: 'Mum', sessionId: 3, createdAt: now - WEEK, heardAt: null,
-        text: "It's Mum. I'm so proud of you. Drink something, and ring me when you're home." },
-    ],
-  };
-  var nextId = 10, session = null, draft = null, recording = null, sentNote = null, tts = null, wake = null;
-
+  var now = Date.now(), nextId = 1;
+  /** Monday = 0. The calendar starts on this week's Monday; day 0 is today. */
+  var todayCol = (new Date().getDay() + 6) % 7, lastDay = SPAN - todayCol - 1;
+  var week = [['Rest', 45], ['Hard', 45], ['Rest', 45], ['Easy', 30], ['Rest', 45], ['Rest', 45], ['Long', 75]];
+  function fromWeek() {
+    var list = [];
+    for (var d = 0; d <= lastDay; d++) { var w = week[(todayCol + d) % 7]; if (w[0] !== 'Rest') list.push({ id: nextId++, what: w[0], inDays: d, minutes: w[1], done: false, heard: [] }); }
+    return list;
+  }
+  var state = { side: 'athlete', view: 'home', sel: null, pick: null, pickId: null, goal: { who: 'Sam', name: 'My first 10K', finish: '2027-06-13' }, sessions: fromWeek(), notes: [] };
+  (function seed() {
+    function first(kind) { return state.sessions.filter(function (s) { return s.what === kind; })[0]; }
+    function add(sender, kind, weeksAgo, text) { state.notes.push({ id: nextId++, sender: sender, sessionId: first(kind).id, createdAt: now - weeksAgo * WEEK, heardAt: null, text: text }); }
+    add('Ben', 'Easy', 1, "Ben here. Nice and easy today, no heroics. I'll have the coffee on when you're back.");
+    add('Anna', 'Long', 2, "Hey, it's Anna. I know the long ones get quiet in the middle. Remember that first walk around the block in the rain? Look how far you've come.");
+    add('Mum', 'Long', 1, "It's Mum. I'm so proud of you. Drink something, and ring me when you're home.");
+  })();
+  var session = null, draft = null, recording = null, sentNote = null, tts = null, wake = null;
   if (window.claude && window.claude.use) window.claude.use('tts').then(function (t) { tts = t; }).catch(function () {});
 
   // ---------- words ----------
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function fmtDate(iso) { var p = iso.split('-').map(Number); return p[2] + ' ' + MONTHS[p[1] - 1] + ' ' + p[0]; }
   function daysUntil(iso) { var p = iso.split('-').map(Number), t = new Date(); return Math.round((Date.UTC(p[0], p[1] - 1, p[2]) - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / DAY); }
+  function dateOf(inDays) { return new Date(Date.now() + inDays * DAY); }
   function dayName(inDays) {
     if (inDays === 0) return 'Today'; if (inDays === 1) return 'Tomorrow';
-    var d = new Date(Date.now() + inDays * DAY);
-    return DAYS[d.getDay()] + (inDays >= 7 ? ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()].slice(0, 3) : '');
+    var d = dateOf(inDays); return DAYS[d.getDay()] + (inDays >= 7 ? ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] : '');
   }
   function howLong(min) { if (min < 60) return min + ' minutes'; var h = Math.floor(min / 60), m = min % 60; return (h === 1 ? '1 hour' : h + ' hours') + (m ? ' ' + m : ''); }
   function shortLong(min) { if (min < 60) return min + ' min'; var h = Math.floor(min / 60), m = min % 60; return h + ' h' + (m ? ' ' + m : ''); }
   function mmss(ms) { var s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
   function names(list) { return list.length < 2 ? list.join('') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1]; }
   function byId(id) { return state.sessions.filter(function (s) { return s.id === id; })[0]; }
+  function onDay(d) { return state.sessions.filter(function (s) { return s.inDays === d; })[0]; }
   function upcoming() { return state.sessions.filter(function (s) { return !s.done; }).sort(function (a, b) { return a.inDays - b.inDays; }); }
-  /** Notes a session will play: the ones left for it, plus any left for "whenever". */
-  function notesFor(s) {
-    var up = upcoming(), isNext = up.length && up[0].id === s.id;   // "any day" notes go to whichever session comes next
-    return state.notes.filter(function (n) { return !n.heardAt && (n.sessionId === s.id || (isNext && n.sessionId === null)); })
-      .sort(function (a, b) { return a.createdAt - b.createdAt; });
-  }
   function countFor(s) { return state.notes.filter(function (n) { return !n.heardAt && n.sessionId === s.id; }).length; }
+  /** Messages a session will play: the ones left for it, plus "any time" ones if it is the next session. */
+  function notesFor(s) {
+    var up = upcoming(), isNext = up.length && up[0].id === s.id;
+    return state.notes.filter(function (n) { return !n.heardAt && (n.sessionId === s.id || (isNext && n.sessionId === null)); }).sort(function (a, b) { return a.createdAt - b.createdAt; });
+  }
+  function planOffsets(n) { var out = []; for (var i = 1; i <= n; i++) out.push(Math.round(DEMO_MS * i / (n + 1))); return out; }
 
-  // One streak for everyone: weeks in a row (Monday to Sunday) in which anyone left a note.
+  // Weeks side by side: weeks in a row (Monday to Sunday) in which anyone left a message.
   function weekOf(ts) { return Math.floor((ts / DAY + 3) / 7); }
-  function streak() {
+  function together() {
     var weeks = {}; state.notes.forEach(function (n) { weeks[weekOf(n.createdAt)] = true; });
     var thisWeek = weekOf(Date.now()), kept = !!weeks[thisWeek], w = kept ? thisWeek : thisWeek - 1, count = 0;
     while (weeks[w]) { count++; w--; }
     return { weeks: count, kept: kept };
   }
-  function streakLine(mine) {
-    var s = streak(), who = mine ? 'Your people have' : 'Their people have';
-    if (s.weeks === 0) return mine ? 'No notes yet. Share your plan and they will come.' : 'Be the first to leave a note this week.';
-    return who + ' been here ' + (s.weeks === 1 ? 'this week' : s.weeks + ' weeks in a row') + '.' + (s.kept || s.weeks === 1 ? '' : ' A note this week keeps it going.');
+  function drawTogether(box, mine) {
+    var t = together(), who = state.goal.who; box.textContent = '';
+    var row = el('div', 'weeks'); row.setAttribute('aria-hidden', 'true');
+    var before = Math.min(t.weeks, 12) - (t.kept ? 1 : 0);
+    for (var i = 0; i < before; i++) row.appendChild(el('i', 'on'));
+    row.appendChild(el('i', t.kept ? 'on' : ''));               // this week: filled once someone has been there
+    box.appendChild(row);
+    var head, sub;
+    if (t.weeks === 0) {
+      head = mine ? 'No one yet' : 'Be the first one there';
+      sub = mine ? 'Send your link to the people close to you.' : 'One message from you and ' + who + ' is not doing this alone.';
+    } else {
+      head = t.weeks === 1 ? 'One week side by side' : t.weeks + ' weeks side by side';
+      var every = t.weeks === 1 ? 'this week' : 'every week for ' + t.weeks + ' weeks';
+      if (mine) sub = t.kept ? 'Someone has been with you ' + every + '.' : 'Someone has been with you ' + every + '. This week is still open.';
+      else sub = t.kept ? 'Someone has been there for ' + who + ' ' + every + ', this week too.' : 'Someone has been there for ' + who + ' ' + every + '. This week is still open. Will it be you?';
+    }
+    box.appendChild(el('b', null, head)); box.appendChild(el('span', 'soft', sub));
   }
-  function planOffsets(n) { var out = []; for (var i = 1; i <= n; i++) out.push(Math.round(DEMO_MS * i / (n + 1))); return out; }
+
+  // ---------- the calendar ----------
+  function drawCal(box, selected, friend, onPick) {
+    box.textContent = '';
+    var from = dateOf(-todayCol), to = dateOf(lastDay);
+    box.appendChild(el('div', 'mo', from.getMonth() === to.getMonth() ? MONTHS[from.getMonth()] : MONTHS[from.getMonth()] + ' – ' + MONTHS[to.getMonth()]));
+    WEEKDAYS.forEach(function (w) { box.appendChild(el('div', 'wd', w.charAt(0))); });
+    for (var i = 0; i < SPAN; i++) (function (d) {
+      var s = onDay(d), past = d < 0, date = dateOf(d);
+      var can = !past && (friend ? s && !s.done : true);
+      var cell = el(can ? 'button' : 'div', 'd' + (s ? ' has' : '') + (d === 0 ? ' today' : '') + (d === selected ? ' sel' : '') + (past ? ' past' : ''));
+      cell.appendChild(el('span', 'n', String(date.getDate())));
+      var m = el('span', 'm');
+      if (s && !past) {
+        var n = s.done ? s.heard.length : (friend ? countFor(s) : notesFor(s).length);
+        if (n === 0 && !s.done) m.appendChild(el('i', 'none'));
+        for (var k = 0; k < Math.min(n, 3); k++) m.appendChild(el('i', s.done ? 'heard' : ''));
+        if (n > 3) m.appendChild(el('span', null, '+'));
+      }
+      cell.appendChild(m);
+      var label = DAYS[date.getDay()] + ' ' + date.getDate() + ' ' + MONTHS[date.getMonth()];
+      if (s) label += ', ' + TITLES[s.what] + ', ' + (s.done ? 'done' : countFor(s) + ' messages');
+      cell.setAttribute('aria-label', label);
+      cell.setAttribute('data-day', d);
+      if (can) cell.onclick = function () { onPick(d); };
+      box.appendChild(cell);
+    })(i - todayCol);
+  }
 
   // ---------- drawing the page ----------
   function go(view) { state.view = view; render(); window.scrollTo(0, 0); }
@@ -335,70 +356,68 @@
     $('holds').hidden = state.view === 'session';
     $('side-athlete').style.color = state.side === 'athlete' ? 'var(--ink)' : '';
     $('side-supporter').style.color = state.side === 'supporter' ? 'var(--ink)' : '';
-    ['home', 'ready', 'add', 'goal', 'session', 'after', 'pick', 'note', 'sent'].forEach(function (v) { $('v-' + v).hidden = v !== state.view; });
+    ['home', 'add', 'goal', 'session', 'after', 'pick', 'note', 'sent'].forEach(function (v) { $('v-' + v).hidden = v !== state.view; });
     if (state.view === 'home') drawHome();
-    if (state.view === 'ready') drawReady();
     if (state.view === 'pick') drawPick();
     if (state.view === 'session') drawSession();
   }
-  function planRow(s, mark, onTap, dots) {
-    var row = el(onTap ? 'button' : 'div', 'row' + (s.done ? ' done' : ''));
-    row.appendChild(el('span', 'day', dayName(s.inDays)));
-    row.appendChild(el('span', 'what', title(s)));
-    mark = howLong(s.minutes) + (mark ? ' · ' + mark : '');
-    var m = el('span', 'mark');
-    if (dots) { var d = el('span', 'dots'); for (var i = 0; i < Math.min(dots, 8); i++) d.appendChild(el('i')); m.appendChild(d); }
-    m.appendChild(document.createTextNode(mark)); row.appendChild(m);
-    if (onTap) row.onclick = onTap;
-    return row;
+  function waitingLine(n, friend) {
+    if (friend) return n === 0 ? 'No one is there yet.' : n === 1 ? 'One person is already there.' : n + ' people are already there.';
+    return n === 0 ? 'No one has left a message here yet.' : n === 1 ? 'One message is waiting for you.' : n + ' messages are waiting for you.';
   }
   function drawHome() {
-    var g = state.goal, d = daysUntil(g.finish);
+    var g = state.goal, d = daysUntil(g.finish), up = upcoming();
     $('h-name').textContent = g.name;
-    $('h-date').textContent = fmtDate(g.finish) + (d > 0 ? ', ' + d + (d === 1 ? ' day' : ' days') + ' to go' : d === 0 ? ', today' : '');
-    $('h-streak').textContent = streakLine(true);
-    var plan = $('h-plan'); plan.textContent = '';
-    var up = upcoming(), first = true;
-    up.slice(0, 5).forEach(function (s) {
+    $('h-date').textContent = fmtDate(g.finish) + (d > 0 ? ' · ' + d + (d === 1 ? ' day' : ' days') + ' to go' : d === 0 ? ' · today' : '');
+    drawTogether($('h-together'), true);
+    if (state.sel === null || state.sel > lastDay) state.sel = up.length ? up[0].inDays : 0;
+    drawCal($('h-cal'), state.sel, false, function (day) { state.sel = day; drawHome(); });
+    var box = $('h-day'), s = onDay(state.sel); box.textContent = '';
+    if (!s) {
+      box.appendChild(el('b', null, dayName(state.sel)));
+      box.appendChild(el('p', 'soft', 'Nothing planned. Add a session?'));
+      var kinds = el('div', 'kinds');
+      KINDS.forEach(function (k) {
+        var b = el('button', 'btn', TITLES[k]);
+        b.onclick = function () { state.sessions.push({ id: nextId++, what: k, inDays: state.sel, minutes: USUAL[k], done: false, heard: [] }); drawHome(); };
+        kinds.appendChild(b);
+      });
+      box.appendChild(kinds);
+    } else if (s.done) {
+      box.appendChild(el('b', null, dayName(s.inDays) + ', ' + TITLES[s.what]));
+      box.appendChild(el('p', 'soft', s.heard.length ? names(s.heard) + (s.heard.length === 1 ? ' was' : ' were') + ' with you.' : 'Done.'));
+    } else {
       var n = notesFor(s).length;
-      var row = planRow(s, n === 0 ? 'no notes yet' : n === 1 ? '1 note tucked in' : n + ' notes tucked in', function () { state.openId = s.id; go('ready'); }, n);
-      if (first) { row.className += ' next'; row.appendChild(el('span', 'go', n ? 'Begin' : 'Open')); first = false; }
-      plan.appendChild(row);
-    });
-    if (up.length > 5) plan.appendChild(el('p', 'soft', 'and ' + (up.length - 5) + ' more after that'));
-    state.sessions.filter(function (s) { return s.done; }).forEach(function (s) {
-      plan.appendChild(planRow(s, s.heard.length ? 'you heard ' + names(s.heard) : 'done'));
-    });
-    if (!state.sessions.length) plan.appendChild(el('p', 'soft', 'Nothing planned yet.'));
-  }
-  function drawReady() {
-    var s = byId(state.openId), n = notesFor(s).length;
-    $('r-what').textContent = title(s);
-    $('r-when').textContent = dayName(s.inDays) + ', ' + howLong(s.minutes);
-    $('r-notes').textContent = n === 0 ? 'Nobody has left a note for this one yet.' : n === 1 ? 'One note is tucked in for this one.' : n + ' notes are tucked in for this one.';
-    $('r-start').hidden = n === 0;
-    $('r-hint').textContent = n === 0 ? 'Share your plan and someone might.' : 'Tap Start, put your phone away, and go. They will find you along the way.';
+      box.appendChild(el('b', null, dayName(s.inDays) + ', ' + TITLES[s.what]));
+      box.appendChild(el('p', 'soft', howLong(s.minutes) + '. ' + waitingLine(n, false)));
+      if (n) { var start = el('button', 'btn main', 'Start'); start.id = 'h-start'; start.onclick = function () { startSession(s); }; box.appendChild(start); }
+      var rm = el('button', 'txt', 'take this day off'); rm.style.alignSelf = 'center';
+      rm.onclick = function () { state.notes.forEach(function (x) { if (x.sessionId === s.id) x.sessionId = null; }); state.sessions = state.sessions.filter(function (x) { return x !== s; }); drawHome(); };
+      box.appendChild(rm);
+    }
   }
   function drawPick() {
-    $('p-name').textContent = state.goal.name;
-    $('p-date').textContent = 'finishing on ' + fmtDate(state.goal.finish);
-    $('p-streak').textContent = streakLine(false);
-    var plan = $('p-plan'); plan.textContent = '';
-    upcoming().slice(0, 5).forEach(function (s) {
+    var g = state.goal;
+    $('p-who').textContent = g.who + ' is working towards';
+    $('p-name').textContent = g.name;
+    $('p-date').textContent = fmtDate(g.finish);
+    drawTogether($('p-together'), false);
+    $('p-ask').textContent = 'Pick a day to be there for ' + g.who + '.';
+    drawCal($('p-cal'), state.pick, true, function (day) { state.pick = day; drawPick(); });
+    var box = $('p-day'), s = state.pick === null ? null : onDay(state.pick); box.textContent = ''; box.hidden = !s;
+    if (s) {
       var n = countFor(s);
-      plan.appendChild(planRow(s, n === 0 ? 'nobody yet' : n === 1 ? '1 note so far' : n + ' notes so far', function () { state.pickId = s.id; openNote(); }, n));
-    });
-    var any = el('button', 'row');
-    any.appendChild(el('span', 'day', 'Any day')); any.appendChild(el('span', 'what', 'Whenever they train next'));
-    any.onclick = function () { state.pickId = null; openNote(); };
-    plan.appendChild(any);
+      box.appendChild(el('b', null, dayName(s.inDays) + ', ' + TITLES[s.what]));
+      box.appendChild(el('p', 'soft', howLong(s.minutes) + '. ' + waitingLine(n, true)));
+      var rec = el('button', 'btn main', n === 0 ? 'Be the first' : 'Be there too'); rec.id = 'p-go';
+      rec.onclick = function () { state.pickId = s.id; openNote(); }; box.appendChild(rec);
+    }
   }
   function drawSession() {
     if (!session) return;
     var s = session, elapsed = Math.min(Date.now() - s.startedAt, DEMO_MS);
-    $('s-what').textContent = title(s.sess) + ', ' + howLong(s.sess.minutes);
-    $('s-end').textContent = shortLong(s.sess.minutes);
-    var stage = $('s-stage'); stage.textContent = ''; stage.className = 'stage' + (s.playing ? ' with' : '');
+    $('s-what').textContent = dayName(s.sess.inDays) + ', ' + TITLES[s.sess.what] + ', ' + howLong(s.sess.minutes);
+    var stage = $('s-stage'); stage.textContent = '';
     if (s.playing) {
       stage.appendChild(el('span', 'soft', 'with you now'));
       stage.appendChild(el('span', 'name', s.playing.sender));
@@ -409,9 +428,7 @@
     }
     var line = $('s-line'); line.textContent = '';
     var gone = el('div', 'gone'); gone.style.width = (elapsed / DEMO_MS * 100) + '%'; line.appendChild(gone);
-    s.offsets.forEach(function (o, i) {
-      var dot = el('div', 'dot' + (s.notes[i].heardAt ? ' heard' : '')); dot.style.left = (o / DEMO_MS * 100) + '%'; line.appendChild(dot);
-    });
+    s.offsets.forEach(function (o, i) { var dot = el('div', 'dot' + (s.notes[i].heardAt ? ' heard' : '')); dot.style.left = (o / DEMO_MS * 100) + '%'; line.appendChild(dot); });
   }
 
   // ---------- playing a note ----------
@@ -472,8 +489,8 @@
   }
 
   // ---------- a session ----------
-  function startSession() {
-    var sess = byId(state.openId), notes = notesFor(sess); if (!notes.length) return;
+  function startSession(sess) {
+    var notes = notesFor(sess); if (!notes.length) return;
     var a = $('note-audio');                         // unlock sound while we still have the tap
     try { a.src = SILENCE; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
     try { if (window.speechSynthesis) { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; window.speechSynthesis.speak(u); } } catch (e) {}
@@ -487,7 +504,7 @@
     if (s.playing || s.next >= s.notes.length || Date.now() - s.startedAt < s.offsets[s.next]) { drawSession(); return; }
     var note = s.notes[s.next], index = s.next; s.next++; s.playing = note; s.showText = false; drawSession();
     playNote(note, index).then(function (ok) {
-      if (session !== s) return;                     // ended meanwhile
+      if (session !== s) return;
       if (ok) { note.heardAt = Date.now(); s.heard.push(note.sender); }
       s.playing = null;
       if (s.next >= s.notes.length) endSession(true); else tick();
@@ -502,19 +519,20 @@
     var left = s.notes.filter(function (n) { return !n.heardAt; });
     left.forEach(function (n) { n.sessionId = null; });   // not heard: they wait for the next session
     $('f-title').textContent = all ? 'That was everyone' : 'Session ended';
-    $('f-line').textContent = (s.heard.length ? names(s.heard) + (s.heard.length === 1 ? ' was' : ' were') + ' with you today.' : 'Nobody got to say hello this time.') +
-      (left.length ? ' ' + (left.length === 1 ? 'One note is' : left.length + ' notes are') + ' saved for next time.' : '');
+    $('f-line').textContent = (s.heard.length ? names(s.heard) + (s.heard.length === 1 ? ' was' : ' were') + ' with you today.' : 'No one got to say hello this time.') +
+      (left.length ? ' ' + (left.length === 1 ? 'One message is' : left.length + ' messages are') + ' saved for next time.' : '');
+    state.sel = s.sess.inDays;
     go('after');
   }
 
-  // ---------- a friend leaves a note ----------
+  // ---------- a friend leaves a message ----------
   function noteStep(step) { $('n-record').hidden = step !== 'record'; $('n-review').hidden = step !== 'review'; }
   function resetRecord() {
     $('n-timer').hidden = true; $('n-rec').textContent = 'Record'; $('n-rec').className = 'btn main'; $('n-rec-oops').hidden = true;
   }
   function openNote() {
     var s = state.pickId === null ? null : byId(state.pickId);
-    $('n-for').textContent = s ? 'For ' + (s.inDays < 2 ? dayName(s.inDays).toLowerCase() : dayName(s.inDays)) + "'s " + short(s) : 'For whenever they train next';
+    $('n-for').textContent = s ? 'For ' + (s.inDays < 2 ? dayName(s.inDays).toLowerCase() : dayName(s.inDays)) + "'s " + short(s) : 'Any time';
     draft = null; resetRecord(); $('n-other').hidden = true; noteStep('record'); go('note');
   }
   function otherWays(why) { resetRecord(); $('n-why').textContent = why; $('n-other').hidden = false; }
@@ -552,53 +570,49 @@
     var first = $('n-first').value.trim(), text = $('n-text').value.trim(), oops = $('n-send-oops');
     oops.hidden = true;
     if (!draft.url && !text) { oops.textContent = 'Write a few words first.'; oops.hidden = false; return; }
-    if (!first) { oops.textContent = 'Add your first name, so they know it is you.'; oops.hidden = false; $('n-first').focus(); return; }
+    if (!first) { oops.textContent = 'Add your first name, so ' + state.goal.who + ' knows it is you.'; oops.hidden = false; $('n-first').focus(); return; }
     $('n-preview').pause();
     sentNote = { id: nextId++, sender: first, sessionId: state.pickId, createdAt: Date.now(), heardAt: null, url: draft.url || null, durationMs: draft.durationMs || 0, text: draft.url ? '' : text, contact: null };
     state.notes.push(sentNote); draft = null; $('n-text').value = '';
-    var s = state.pickId === null ? null : byId(state.pickId);
-    $('t-line').textContent = s ? 'They will hear you somewhere along ' + (s.inDays < 2 ? dayName(s.inDays).toLowerCase() : dayName(s.inDays)) + "'s " + short(s) + '.' : 'They will hear you the next time they train.';
+    var s = state.pickId === null ? null : byId(state.pickId), who = state.goal.who;
+    $('t-line').textContent = s ? who + ' will hear you somewhere along ' + (s.inDays < 2 ? dayName(s.inDays).toLowerCase() : dayName(s.inDays)) + "'s " + short(s) + '.' : who + ' will hear you the next time they train.';
+    $('t-contact-label').textContent = 'Want to know when ' + who + ' has heard it?';
     $('t-contact').value = ''; $('t-ask').hidden = false; $('t-done').hidden = true; $('t-next').hidden = true;
     go('sent');
   }
   function contactDone(msg) { $('t-ask').hidden = true; $('t-done').textContent = msg; $('t-done').hidden = false; $('t-next').hidden = false; }
 
-  // ---------- the athlete's own entries ----------
-  var KINDS = ['Rest', 'Easy', 'Hard', 'Long'];
-  var WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  var week = [['Rest', 45], ['Hard', 45], ['Rest', 45], ['Easy', 30], ['Rest', 45], ['Rest', 45], ['Long', 75]];
+  // ---------- your own entries ----------
   function drawWeek() {
     var box = $('a-week'); box.textContent = '';
     WEEKDAYS.forEach(function (name, i) {
       var line = el('div'), kind = document.createElement('select'), long = document.createElement('select');
       kind.id = 'a-kind-' + i; long.id = 'a-long-' + i; kind.setAttribute('aria-label', name + ': what'); long.setAttribute('aria-label', name + ': how long');
-      KINDS.forEach(function (k) { var o = el('option', null, TITLES[k] || 'Rest'); o.value = k; if (k === week[i][0]) o.selected = true; kind.appendChild(o); });
+      ['Rest'].concat(KINDS).forEach(function (k) { var o = el('option', null, TITLES[k] || 'rest'); o.value = k; if (k === week[i][0]) o.selected = true; kind.appendChild(o); });
       LENGTHS.forEach(function (m) { var o = el('option', null, shortLong(m)); o.value = m; if (m === week[i][1]) o.selected = true; long.appendChild(o); });
       function sync() { week[i] = [kind.value, Number(long.value)]; kind.className = kind.value === 'Rest' ? 'rest' : ''; long.hidden = kind.value === 'Rest'; }
       kind.onchange = long.onchange = sync; sync();
       line.appendChild(el('span', null, name)); line.appendChild(kind); line.appendChild(long); box.appendChild(line);
     });
   }
-  /** Swap in a new plan. Sessions already done stay; notes left for a session that is gone wait for "any day". */
-  function replacePlan(list) {
-    var kept = state.sessions.filter(function (s) { return s.done; });
-    list.sort(function (a, b) { return a.inDays - b.inDays; });
-    state.sessions = kept.concat(list.map(function (x) { return { id: nextId++, what: x.what, inDays: x.inDays, minutes: x.minutes, done: false, heard: [] }; }));
-    state.notes.forEach(function (n) { if (n.sessionId !== null && !byId(n.sessionId)) n.sessionId = null; });
-    go('home');
-  }
   function useWeek() {
-    var list = [];
-    for (var d = 0; d < 14; d++) {
-      var wd = (new Date(Date.now() + d * DAY).getDay() + 6) % 7;      // Monday = 0
-      if (week[wd][0] !== 'Rest') list.push({ what: week[wd][0], inDays: d, minutes: week[wd][1] });
-    }
-    if (!list.length) { $('a-oops').textContent = 'Every day is a rest day. Choose at least one session.'; $('a-oops').hidden = false; return; }
-    replacePlan(list);
+    var list = fromWeek();
+    if (!list.length) { $('a-oops').textContent = 'Every day is a rest day. Choose at least one day to train.'; $('a-oops').hidden = false; return; }
+    // Sessions already done stay. A message left for a day that still has a session stays on that day; otherwise it waits for "any time".
+    var done = state.sessions.filter(function (s) { return s.done; }), old = state.sessions;
+    list = list.filter(function (x) { return !done.some(function (d) { return d.inDays === x.inDays; }); });
+    state.sessions = done.concat(list);
+    state.notes.forEach(function (n) {
+      if (n.sessionId === null || byId(n.sessionId)) return;
+      var was = old.filter(function (s) { return s.id === n.sessionId; })[0], still = was && onDay(was.inDays);
+      n.sessionId = still ? still.id : null;
+    });
+    state.sel = null; go('home');
   }
   function saveGoal() {
-    var name = $('g-name').value.trim(), m = /^(\d{1,2})[\/.\- ](\d{1,2})[\/.\- ](\d{4})$/.exec($('g-when').value.trim()), oops = $('g-oops');
+    var who = $('g-who').value.trim(), name = $('g-name').value.trim(), m = /^(\d{1,2})[\/.\- ](\d{1,2})[\/.\- ](\d{4})$/.exec($('g-when').value.trim()), oops = $('g-oops');
     function fail(t) { oops.textContent = t; oops.hidden = false; }
+    if (!who) return fail('Add your first name, so your people know whose link it is.');
     if (!name) return fail('Give your goal a name.');
     if (!m) return fail('Write the day like 14/06/2027.');
     var d = Number(m[1]), mo = Number(m[2]), y = Number(m[3]), date = new Date(y, mo - 1, d);
@@ -606,21 +620,20 @@
     var p = function (n) { return (n < 10 ? '0' : '') + n; }, iso = y + '-' + p(mo) + '-' + p(d), t = new Date();
     if (iso < t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate())) return fail('That day has already passed.');
     oops.hidden = true;
-    state.goal = { name: name, finish: iso }; state.sessions = []; state.notes = [];
-    go('home');
+    state.goal = { who: who, name: name, finish: iso }; state.sessions = []; state.notes = []; state.sel = null; state.pick = null;
+    drawWeek(); go('add');
   }
 
   // ---------- taps ----------
   $('side-athlete').onclick = function () { state.side = 'athlete'; go('home'); };
-  $('side-supporter').onclick = $('h-share').onclick = function () { state.side = 'supporter'; go('pick'); };
-  $('h-add').onclick = function () { $('a-oops').hidden = true; drawWeek(); go('add'); };
+  $('side-supporter').onclick = $('h-share').onclick = function () { state.side = 'supporter'; state.pick = null; go('pick'); };
+  $('h-week').onclick = function () { $('a-oops').hidden = true; drawWeek(); go('add'); };
   $('h-new').onclick = function () { $('g-oops').hidden = true; go('goal'); };
   $('a-save').onclick = useWeek; $('a-cancel').onclick = function () { go('home'); };
   $('g-save').onclick = saveGoal; $('g-cancel').onclick = function () { go('home'); };
-  $('r-back').onclick = function () { go('home'); };
-  $('r-start').onclick = startSession;
   $('s-stop').onclick = function () { endSession(false); };
   $('f-ok').onclick = function () { go('home'); };
+  $('p-any').onclick = function () { state.pickId = null; openNote(); };
   $('n-back').onclick = function () { if (recording && recording.rec.state !== 'inactive') recording.rec.stop(); go('pick'); };
   $('n-rec').onclick = function () { if (recording) { if (recording.rec.state !== 'inactive') recording.rec.stop(); } else startRecording(); };
   $('n-file-btn').onclick = function () { $('n-file').click(); };
@@ -629,7 +642,7 @@
     if (!f) return;
     var url = URL.createObjectURL(f), probe = new Audio();
     probe.onloadedmetadata = function () { toReview({ url: url, durationMs: isFinite(probe.duration) ? Math.round(probe.duration * 1000) : 60000 }); };
-    probe.onerror = function () { $('n-rec-oops').textContent = "This phone can't play that file. Try another, or write your note."; $('n-rec-oops').hidden = false; };
+    probe.onerror = function () { $('n-rec-oops').textContent = "This phone can't play that file. Try another, or write your message."; $('n-rec-oops').hidden = false; };
     probe.src = url;
   };
   $('n-write-btn').onclick = function () { toReview({ url: null }); };
@@ -640,9 +653,9 @@
     if (c.length < 3) { $('t-contact').focus(); return; }
     sentNote.contact = c; contactDone("We'll let you know. (The demo keeps this on the page and sends nothing.)");
   };
-  $('t-skip').onclick = function () { contactDone('All done. Thank you for coming along.'); };
-  $('t-another').onclick = function () { go('pick'); };
-  $('t-athlete').onclick = function () { state.side = 'athlete'; go('home'); };
+  $('t-skip').onclick = function () { contactDone('All done. Thank you for being there.'); };
+  $('t-another').onclick = function () { state.pick = null; go('pick'); };
+  $('t-athlete').onclick = function () { state.side = 'athlete'; state.sel = null; go('home'); };
 
   render();
 })();

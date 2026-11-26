@@ -63,3 +63,11 @@ link, people record a message, it plays when you need it most, in a training ses
   Garmin, Polar or anywhere else is parked.
 - Example goal is "My first 10K"; the switch at the top reads "you · a friend".
 - Same check re-run: passes.
+
+## Revision 4 (26 Nov)
+Eric: go ahead with the real build; trim the look further; a calendar is the most intuitive
+form; keep the dots (messages recorded / none yet); make the streak wording natural and make
+the streak itself more visible. Demo now: a five-week calendar, dots under each training day
+(filled = a message, hollow = no one yet), tap a day or "any time"; the streak is a row of
+week-dots with "N weeks side by side" and a plain sentence naming the athlete. The athlete's
+first name is now part of the goal so the wording can be personal. Same check re-run: passes.
