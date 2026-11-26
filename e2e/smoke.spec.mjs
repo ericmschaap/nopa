@@ -14,5 +14,5 @@ test('supporter page is served', async ({ page }) => {
 
 test('athlete app boots', async ({ page }) => {
   await page.goto(ATHLETE_URL);
-  await expect(page.getByText('Nopa').first()).toBeVisible();
+  await expect(page.getByText('nopa', { exact: true })).toBeVisible();
 });
