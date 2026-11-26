@@ -51,3 +51,15 @@ Polar and the like) or be set up in the app.
 - Checked in Chromium: typical week replaces the plan and keeps heard sessions; notes left
   for a removed session wait for the next one. The pasted-plan path could not be run here
   (it needs the artifact viewer); only its empty and unavailable states were checked.
+
+## Revision 3 (26 Nov)
+Eric: this is for anyone working towards an athletic goal (a 5K, a mountain, a bike ride),
+not for "proper" endurance athletes; no coach input; keep it basic. The basics are: share a
+link, people record a message, it plays when you need it most, in a training session.
+- Sessions are no longer sport terms. Each is **an easy one, a hard one or a long one**, with
+  a day and a rough length. Works for any goal, and tells a friend where they are needed.
+- Plan setup is one screen: which days you usually train and what kind of day each is.
+- The pasted-plan import and all coach / training-app wording are removed. Importing from
+  Garmin, Polar or anywhere else is parked.
+- Example goal is "My first 10K"; the switch at the top reads "you · a friend".
+- Same check re-run: passes.
