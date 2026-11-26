@@ -2,7 +2,7 @@
 //   npm run db:test
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { admin, api, getNote, makeWav, newAthlete, newAudioPath, rpc, seedCorner, sendNote, uploadAudio } from './helpers.mjs';
+import { admin, api, day, getNote, makeWav, newAthlete, newAudioPath, rpc, seedCorner, seedSession, sendNote, uploadAudio } from './helpers.mjs';
 
 describe('share-links: what a link reveals', () => {
   test('R2: a token gives the goal name and finish date', async () => {
@@ -24,7 +24,7 @@ describe('share-links: what a link reveals', () => {
     await sendNote(corner, 'Anna');
     const r = await rpc('get_corner_by_token', { p_token: corner.share_token });
     for (const key of Object.keys(r.json[0])) {
-      assert.ok(['name', 'finish_date', 'streak_weeks', 'this_week_kept'].includes(key), `unexpected field ${key}`);
+      assert.ok(['name', 'athlete_name', 'finish_date', 'streak_weeks', 'this_week_kept'].includes(key), `unexpected field ${key}`);
     }
     for (const table of ['corners', 'notes', 'note_contacts']) {
       const t = await api(`/rest/v1/${table}?select=*`);
@@ -311,7 +311,7 @@ describe('streak: one shared streak per corner', () => {
     const corner = await seedCorner(a);
     await sendNote(corner, 'Anna');
     const link = (await rpc('get_corner_by_token', { p_token: corner.share_token })).json[0];
-    assert.deepEqual(Object.keys(link).sort(), ['finish_date', 'name', 'streak_weeks', 'this_week_kept']);
+    assert.deepEqual(Object.keys(link).sort(), ['athlete_name', 'finish_date', 'name', 'streak_weeks', 'this_week_kept']);
     const mine = (await rpc('my_corner_streaks', {}, { token: a.token })).json[0];
     assert.deepEqual(Object.keys(mine).sort(), ['corner_id', 'streak_weeks', 'this_week_kept']);
   });
@@ -328,5 +328,133 @@ describe('streak: one shared streak per corner', () => {
     assert.equal((await rpc('my_corner_streaks', {})).ok, false);
     assert.equal((await rpc('corner_streak', { p_corner_id: theirs.id }, { token: a.token })).ok, false);
     assert.equal((await rpc('corner_streak', { p_corner_id: theirs.id })).ok, false);
+  });
+});
+
+describe('plan: sessions and messages left for a day', () => {
+  const as = (a) => ({ token: a.token });
+  const WEEK = [null, { kind: 'hard', minutes: 45 }, null, { kind: 'easy', minutes: 30 }, null, null, { kind: 'long', minutes: 75 }];
+  const plan = async (corner) => (await rpc('get_plan_by_token', { p_token: corner.share_token })).json;
+  const mine = async (a, corner) => (await api(`/rest/v1/sessions?corner_id=eq.${corner.id}&order=day`, as(a))).json;
+
+  test('R1: a usual week fills the calendar, three sessions a week, up to 12 weeks', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a);
+    const r = await rpc('set_usual_week', { p_corner_id: corner.id, p_week: WEEK, p_from: day(0) }, as(a));
+    assert.equal(r.ok, true);
+    const sessions = await mine(a, corner);
+    assert.equal(sessions.length, r.json);
+    assert.ok(sessions.length >= 35 && sessions.length <= 37, `got ${sessions.length}`);
+    for (const s of sessions) {
+      const isodow = (new Date(s.day + 'T00:00:00Z').getUTCDay() + 6) % 7; // Monday = 0
+      assert.deepEqual({ kind: s.kind, minutes: s.minutes }, WEEK[isodow]);
+    }
+  });
+
+  test('R1: the plan stops at the finish day', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a, { finish_date: day(9) });
+    await rpc('set_usual_week', { p_corner_id: corner.id, p_week: WEEK.map(() => ({ kind: 'easy', minutes: 20 })), p_from: day(0) }, as(a));
+    const sessions = await mine(a, corner);
+    assert.equal(sessions.length, 10);
+    assert.equal(sessions.at(-1).day, day(9));
+  });
+
+  test('R2: one day can be added, changed and taken off', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a);
+    const id = (await rpc('set_session', { p_corner_id: corner.id, p_day: day(2), p_kind: 'hard', p_minutes: 45 }, as(a))).json;
+    const same = (await rpc('set_session', { p_corner_id: corner.id, p_day: day(2), p_kind: 'long', p_minutes: 90 }, as(a))).json;
+    assert.equal(same, id);
+    assert.deepEqual((await mine(a, corner)).map((s) => [s.day, s.kind, s.minutes]), [[day(2), 'long', 90]]);
+    assert.equal((await rpc('set_session', { p_corner_id: corner.id, p_day: day(3), p_kind: 'sprint', p_minutes: 45 }, as(a))).ok, false);
+    await rpc('remove_session', { p_session_id: id }, as(a));
+    assert.deepEqual(await mine(a, corner), []);
+  });
+
+  test('R3: only the owner can change or read a plan directly', async () => {
+    const [a, b] = [await newAthlete(), await newAthlete()];
+    const corner = await seedCorner(a);
+    const s = await seedSession(corner, 1);
+    assert.equal((await rpc('set_session', { p_corner_id: corner.id, p_day: day(2), p_kind: 'easy', p_minutes: 30 }, as(b))).ok, false);
+    assert.equal((await rpc('set_usual_week', { p_corner_id: corner.id, p_week: WEEK, p_from: day(0) }, as(b))).ok, false);
+    assert.equal((await rpc('set_session', { p_corner_id: corner.id, p_day: day(2), p_kind: 'easy', p_minutes: 30 })).ok, false);
+    await rpc('remove_session', { p_session_id: s.id }, as(b));
+    assert.equal((await mine(a, corner)).length, 1);
+    assert.deepEqual(await mine(b, corner), []);
+    const direct = await api('/rest/v1/sessions', { ...as(a), method: 'POST', body: { corner_id: corner.id, day: day(5), kind: 'easy', minutes: 30 } });
+    assert.equal(direct.ok, false);
+    const anon = await api('/rest/v1/sessions?select=*');
+    assert.ok(!anon.ok || anon.json.length === 0);
+  });
+
+  test('R4: the link shows upcoming sessions with how many messages each has, never from whom', async () => {
+    const corner = await seedCorner(await newAthlete());
+    await seedSession(corner, -5, 'easy', 30);
+    const hard = await seedSession(corner, 1, 'hard', 45);
+    const long = await seedSession(corner, 4, 'long', 75);
+    await seedSession(corner, 70, 'easy', 30);
+    await sendNote(corner, 'Anna', { sessionId: long.id });
+    await sendNote(corner, 'Mum', { sessionId: long.id });
+    await sendNote(corner, 'Ben');
+    const rows = await plan(corner);
+    assert.deepEqual(rows.map((r) => [r.day, r.kind, r.minutes, r.messages]), [[day(1), 'hard', 45, 0], [day(4), 'long', 75, 2]]);
+    assert.deepEqual(Object.keys(rows[0]).sort(), ['day', 'id', 'kind', 'messages', 'minutes']);
+    assert.equal(rows[0].id, hard.id);
+    assert.deepEqual((await rpc('get_plan_by_token', { p_token: 'nope' })).json, []);
+  });
+
+  test('R4: a heard message no longer counts on the link', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a);
+    const s = await seedSession(corner, 1);
+    const id = await sendNote(corner, 'Anna', { sessionId: s.id });
+    await rpc('mark_note_heard', { p_note_id: id }, as(a));
+    assert.equal((await plan(corner))[0].messages, 0);
+  });
+
+  test('recording R6: a message is stored for the chosen session, or for any time', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a);
+    const s = await seedSession(corner, 2, 'hard', 45);
+    const forDay = await sendNote(corner, 'Anna', { sessionId: s.id });
+    const anyTime = await sendNote(corner, 'Ben');
+    assert.equal((await getNote(forDay)).session_id, s.id);
+    assert.equal((await getNote(anyTime)).session_id, null);
+    const seen = (await api(`/rest/v1/notes?select=sender_name,session_id&order=created_at`, as(a))).json;
+    assert.deepEqual(seen, [{ sender_name: 'Anna', session_id: s.id }, { sender_name: 'Ben', session_id: null }]);
+  });
+
+  test("recording R6: a message cannot be left for another corner's session", async () => {
+    const corner = await seedCorner(await newAthlete());
+    const other = await seedSession(await seedCorner(await newAthlete()), 2);
+    const path = newAudioPath();
+    await uploadAudio(path, makeWav());
+    const r = await rpc('submit_note', { p_token: corner.share_token, p_sender_name: 'Anna', p_audio_path: path, p_duration_ms: 1000, p_session_id: other.id });
+    assert.match(r.json.message, /session_not_found/);
+  });
+
+  test('R2: taking a day off, or changing the usual week, keeps the messages', async () => {
+    const a = await newAthlete();
+    const corner = await seedCorner(a);
+    await rpc('set_usual_week', { p_corner_id: corner.id, p_week: WEEK.map(() => ({ kind: 'easy', minutes: 30 })), p_from: day(0) }, as(a));
+    const sessions = await mine(a, corner);
+    const tueOrLater = sessions.find((s) => (new Date(s.day + 'T00:00:00Z').getUTCDay() + 6) % 7 === 1);
+    const wed = sessions.find((s) => (new Date(s.day + 'T00:00:00Z').getUTCDay() + 6) % 7 === 2);
+    const kept = await sendNote(corner, 'Anna', { sessionId: tueOrLater.id });
+    const moved = await sendNote(corner, 'Ben', { sessionId: wed.id });
+    await rpc('set_usual_week', { p_corner_id: corner.id, p_week: WEEK, p_from: day(0) }, as(a)); // Tuesday stays, Wednesday becomes rest
+    assert.equal((await getNote(kept)).session_id, tueOrLater.id);
+    assert.equal((await getNote(moved)).session_id, null);
+    await rpc('remove_session', { p_session_id: tueOrLater.id }, as(a));
+    assert.equal((await getNote(kept)).session_id, null);
+  });
+
+  test('corners R1: the athlete gives a first name with the goal, and the link shows it', async () => {
+    const a = await newAthlete();
+    const r = await api('/rest/v1/corners', { ...as(a), method: 'POST', body: { name: 'A long ride', finish_date: '2027-05-01', athlete_name: 'Sam' }, headers: { prefer: 'return=representation' } });
+    assert.equal(r.status, 201);
+    const link = (await rpc('get_corner_by_token', { p_token: r.json[0].share_token })).json[0];
+    assert.equal(link.athlete_name, 'Sam');
   });
 });

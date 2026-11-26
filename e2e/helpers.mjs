@@ -34,10 +34,10 @@ export async function newAthlete() {
 }
 
 /** Insert a corner straight into the database for an athlete. */
-export async function seedCorner(athlete, { name = 'Berlin Marathon', finish_date = '2027-09-26' } = {}) {
+export async function seedCorner(athlete, { name = 'My first 10K', finish_date = '2027-06-13', athlete_name = 'Sam' } = {}) {
   const r = await admin('/rest/v1/corners', {
     method: 'POST',
-    body: { owner_id: athlete.id, name, finish_date },
+    body: { owner_id: athlete.id, name, finish_date, athlete_name },
     headers: { prefer: 'return=representation' },
   });
   if (!r.ok) throw new Error(`seedCorner failed: ${JSON.stringify(r.json)}`);
@@ -65,12 +65,12 @@ export function uploadAudio(path, bytes, opts = {}) {
 }
 
 /** Do what the supporter page does: upload a file, then submit the note. Returns the note id. */
-export async function sendNote(corner, senderName = 'Anna', { seconds = 1, createdAt } = {}) {
+export async function sendNote(corner, senderName = 'Anna', { seconds = 1, createdAt, sessionId = null } = {}) {
   const path = newAudioPath();
   const up = await uploadAudio(path, makeWav(seconds));
   if (!up.ok) throw new Error(`upload failed: ${JSON.stringify(up.json)}`);
   const r = await rpc('submit_note', {
-    p_token: corner.share_token, p_sender_name: senderName, p_audio_path: path, p_duration_ms: Math.round(seconds * 1000),
+    p_token: corner.share_token, p_sender_name: senderName, p_audio_path: path, p_duration_ms: Math.round(seconds * 1000), p_session_id: sessionId,
   });
   if (!r.ok) throw new Error(`submit_note failed: ${JSON.stringify(r.json)}`);
   if (createdAt) {
@@ -81,5 +81,20 @@ export async function sendNote(corner, senderName = 'Anna', { seconds = 1, creat
 
 export async function getNote(id) {
   const r = await admin(`/rest/v1/notes?id=eq.${id}`);
+  return r.json[0];
+}
+
+/** Local calendar day as YYYY-MM-DD, `offset` days from today. */
+export function day(offset = 0) {
+  const d = new Date(Date.now() + offset * 864e5);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Put a session straight into the plan. */
+export async function seedSession(corner, offset, kind = 'easy', minutes = 30) {
+  const r = await admin('/rest/v1/sessions', {
+    method: 'POST', body: { corner_id: corner.id, day: day(offset), kind, minutes }, headers: { prefer: 'return=representation' },
+  });
+  if (!r.ok) throw new Error(`seedSession failed: ${JSON.stringify(r.json)}`);
   return r.json[0];
 }
