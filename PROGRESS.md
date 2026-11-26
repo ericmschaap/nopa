@@ -16,6 +16,7 @@ Test status at the last run: 30 unit, 30 database, 28 end-to-end, all passing.
 | 004 | session-playback | archived (real-phone checks pending) |
 | 005 | heard-tracking | archived |
 | 006 | streak | archived |
+| 007 | phone-demo | archived (a demo page, not a product capability) |
 
 ## Stubbed
 

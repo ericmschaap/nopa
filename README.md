@@ -15,6 +15,7 @@ status is in [`PROGRESS.md`](PROGRESS.md).
 | `supabase/` | Database migrations and local stack config |
 | `e2e/` | Database tests and Playwright end-to-end tests |
 | `specs/` | Source of truth: project, capability specs, archived changes |
+| `demo/` | A self-contained demo of both sides with no backend, published as a Claude artifact |
 | `index.html` | The earlier milestone 1 playback-proof page. Not part of the product. |
 
 ## Run it on your computer
