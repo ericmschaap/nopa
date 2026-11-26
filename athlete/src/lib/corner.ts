@@ -3,15 +3,17 @@
 export type Corner = {
   id: string;
   name: string;
+  /** The athlete's first name, shown to supporters. */
+  athlete_name: string;
   finish_date: string; // YYYY-MM-DD
   share_token: string;
   created_at: string;
 };
 
-export type CornerInput = { name: string; day: string; month: string; year: string };
+export type CornerInput = { who: string; name: string; day: string; month: string; year: string };
 
 export type CornerValidation =
-  | { ok: true; name: string; finishDate: string }
+  | { ok: true; who: string; name: string; finishDate: string }
   | { ok: false; error: string };
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -22,12 +24,15 @@ export function toIsoDate(d: Date): string {
 
 /** Check the create form. `today` is the athlete's local date. */
 export function validateCorner(input: CornerInput, today: Date = new Date()): CornerValidation {
+  const who = input.who.trim();
+  if (!who) return { ok: false, error: 'Add your first name, so your people know whose link it is.' };
+  if (who.length > 30) return { ok: false, error: 'Just your first name is enough.' };
   const name = input.name.trim();
   if (!name) return { ok: false, error: 'Give your goal a name.' };
   if (name.length > 80) return { ok: false, error: 'That name is a little long. Keep it under 80 characters.' };
 
   if (!input.day.trim() || !input.month.trim() || !input.year.trim()) {
-    return { ok: false, error: 'Add the finish date: day, month and year.' };
+    return { ok: false, error: 'Add the day: day, month and year.' };
   }
   const [day, month, year] = [input.day, input.month, input.year].map((v) => Number(v.trim()));
   const date = new Date(year, month - 1, day);
@@ -37,8 +42,8 @@ export function validateCorner(input: CornerInput, today: Date = new Date()): Co
   if (!real) return { ok: false, error: "That date doesn't exist. Check the day, month and year." };
 
   const finishDate = `${year}-${pad(month)}-${pad(day)}`;
-  if (finishDate < toIsoDate(today)) return { ok: false, error: 'The finish date has already passed. Pick today or later.' };
-  return { ok: true, name, finishDate };
+  if (finishDate < toIsoDate(today)) return { ok: false, error: 'That day has already passed. Pick today or later.' };
+  return { ok: true, who, name, finishDate };
 }
 
 /** The link an athlete sends to their people. */
