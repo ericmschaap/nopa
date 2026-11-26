@@ -30,3 +30,8 @@ picks Saturday's intervals, writes a note, and it appears on that session; start
 run plays its two notes in order and ends with "Anna and Mum were with you today"; the row
 then reads "you heard Anna and Mum"; adding a session works; no console errors, no sideways
 scroll. Not checked on a real phone.
+
+## Revision (26 Nov, after Eric's feedback)
+The handwriting was too much. The look is now a studio timetable: a refined serif for names
+and moments, a light sans with small spaced capitals for labels, one muted sage, pill
+buttons, more white space. Flow and wording unchanged. Re-run of the same check: passes.
