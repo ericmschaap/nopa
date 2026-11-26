@@ -1,229 +1,224 @@
 <title>Nopa demo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&display=swap">
 <style>
-  /* Layout: one phone-width column; a two-way switch at the top chooses whose screen you hold. */
+  /* Layout: a page from a training diary. One column, ink on paper, pencil rules, no boxes. */
   :root {
-    --bg: #f6f5f1; --card: #ffffff; --ink: #1c1b19; --muted: #6b6860; --line: #dedbd2;
-    --accent: #0b6e4f; --accent-ink: #ffffff; --warn: #b3261e; --soft: #e8f1ec;
-    --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --paper: #fbfaf6; --ink: #2a2927; --pencil: #7d7a73; --rule: #dcd9d1; --red: #a8402f;
+    --hand: "Caveat", "Bradley Hand", "Segoe Print", cursive;
+    --text: "Patrick Hand", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #151513; --card: #201f1c; --ink: #eeece6; --muted: #a09c92; --line: #3a3833;
-      --accent: #35b88a; --accent-ink: #0c1512; --warn: #ff8a80; --soft: #1d2a24; color-scheme: dark;
-    }
+    :root:not([data-theme="light"]) { --paper: #1b1a18; --ink: #ece9e2; --pencil: #a09c93; --rule: #3b3935; --red: #e58f7f; color-scheme: dark; }
   }
-  :root[data-theme="dark"] {
-    --bg: #151513; --card: #201f1c; --ink: #eeece6; --muted: #a09c92; --line: #3a3833;
-    --accent: #35b88a; --accent-ink: #0c1512; --warn: #ff8a80; --soft: #1d2a24; color-scheme: dark;
-  }
+  :root[data-theme="dark"] { --paper: #1b1a18; --ink: #ece9e2; --pencil: #a09c93; --rule: #3b3935; --red: #e58f7f; color-scheme: dark; }
   * { box-sizing: border-box; }
   body {
-    background: var(--bg); color: var(--ink); font: 17px/1.5 var(--font);
-    padding-block: 16px 48px;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    background: var(--paper); color: var(--ink); font: 19px/1.45 var(--text);
+    padding-block: 18px 56px;
+    padding-left: max(22px, env(safe-area-inset-left, 0px));
+    padding-right: max(22px, env(safe-area-inset-right, 0px));
   }
-  main { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .brand { font-weight: 700; font-size: 1.1rem; letter-spacing: .02em; color: var(--accent); }
-  .tag { font-size: .8rem; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; }
-  .sides { display: grid; grid-template-columns: 1fr 1fr; background: var(--soft); border-radius: 14px; padding: 4px; gap: 4px; }
-  .sides button {
-    font: inherit; font-size: .95rem; font-weight: 600; min-height: 44px; border: 0; border-radius: 10px;
-    background: transparent; color: var(--muted); cursor: pointer;
-  }
-  .sides button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
-  section.view { display: flex; flex-direction: column; gap: 16px; }
-  h1 { font-size: 1.75rem; line-height: 1.2; margin: 0; text-wrap: balance; }
-  h2 { font-size: 1.1rem; margin: 0 0 6px; }
+  main { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--pencil); font-size: 1rem; }
+  .top b { font: 700 1.5rem var(--hand); color: var(--ink); }
+  .who-holds { color: var(--pencil); font-size: 1rem; }
+  section.view { display: flex; flex-direction: column; gap: 22px; }
+  h1 { font: 700 2.9rem/1 var(--hand); margin: 0; text-wrap: balance; }
+  h2 { font: 700 1.75rem/1.1 var(--hand); margin: 0; }
   p { margin: 0; }
-  .muted { color: var(--muted); }
-  .small { font-size: .9rem; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-  .streak { background: var(--soft); border-radius: 12px; padding: 10px 14px; }
-  .streak strong { display: block; }
+  .soft { color: var(--pencil); }
+  .group { display: flex; flex-direction: column; gap: 8px; }
+  /* buttons are drawn, not filled: a slightly uneven pencil outline */
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
   .btn {
-    font: inherit; font-weight: 600; width: 100%; min-height: 54px; border-radius: 14px; cursor: pointer;
-    border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 8px 14px;
+    display: block; width: 100%; min-height: 56px; padding: 10px 18px; text-align: center; font-size: 1.25rem;
+    border: 1.5px solid var(--ink); border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px;
   }
-  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-  .btn.big { min-height: 84px; font-size: 1.5rem; }
-  .btn.rec { background: var(--warn); color: #fff; border-color: var(--warn); }
-  .btn.link { border: 0; min-height: 44px; font-weight: 500; color: var(--muted); text-decoration: underline; }
-  .btn:disabled { opacity: .5; cursor: default; }
-  button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chips button {
-    font: inherit; min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid var(--line);
-    background: transparent; color: var(--ink); cursor: pointer;
+  .btn.main { border-width: 2.5px; font: 700 1.9rem var(--hand); min-height: 68px; }
+  .btn.red { border-color: var(--red); color: var(--red); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .txt { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; min-height: 44px; }
+  .txt.soft { color: var(--pencil); }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px dashed var(--ink); outline-offset: 3px; }
+  /* the plan: diary lines */
+  .plan { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
+  .row { display: grid; grid-template-columns: 5.6em 1fr; gap: 4px 12px; padding: 14px 2px; border-bottom: 1px solid var(--rule); width: 100%; min-height: 64px; align-items: baseline; }
+  .row .day { font: 700 1.45rem/1.1 var(--hand); }
+  .row .what { min-width: 0; }
+  .row .mark { grid-column: 2; color: var(--pencil); font-size: 1rem; }
+  .row.done .day, .row.done .what { color: var(--pencil); text-decoration: line-through; text-decoration-thickness: 1px; }
+  label { display: block; color: var(--pencil); font-size: 1rem; }
+  input[type=text], textarea, select {
+    font: inherit; color: var(--ink); width: 100%; background: transparent; border: 0; border-bottom: 1.5px solid var(--ink);
+    border-radius: 0; padding: 8px 2px; min-height: 46px;
   }
-  .chips button[aria-checked="true"] { border-color: var(--accent); background: var(--soft); font-weight: 700; }
-  label { font-weight: 600; display: block; margin-bottom: 6px; }
-  input[type=text], input[type=number], textarea {
-    font: inherit; width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--line);
-    background: var(--bg); color: var(--ink);
-  }
-  textarea { min-height: 110px; resize: vertical; }
-  .date { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 10px; }
+  textarea { min-height: 120px; resize: vertical; border: 1.5px solid var(--rule); border-bottom-color: var(--ink); padding: 10px; }
+  ::placeholder { color: var(--pencil); opacity: .8; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   audio { width: 100%; }
-  .error { color: var(--warn); }
-  .timer { font-variant-numeric: tabular-nums; font-size: 2.2rem; font-weight: 700; text-align: center; }
-  .heard { border-top: 1px solid var(--line); padding-top: 10px; }
-  .heard b { display: block; }
-  .stage { background: var(--soft); border-radius: 16px; padding: 32px 18px; text-align: center; display: flex; flex-direction: column; gap: 6px; }
-  .stage .who { font-size: 2.1rem; font-weight: 700; line-height: 1.15; }
-  .stage .big { font-size: 1.5rem; font-weight: 700; }
-  .said { font-style: italic; }
-  /* the session as a line: a dot for each note, where it falls in time */
-  .line { position: relative; height: 28px; margin: 6px 8px 0; }
-  .line::before { content: ""; position: absolute; left: 0; right: 0; top: 13px; height: 2px; background: var(--line); }
-  .line .fill { position: absolute; left: 0; top: 13px; height: 2px; background: var(--accent); }
-  .line .dot { position: absolute; top: 7px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--card); border: 2px solid var(--accent); }
-  .line .dot.done { background: var(--accent); }
-  .line .now { position: absolute; top: 3px; width: 2px; height: 22px; background: var(--ink); }
-  .ends { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; margin: 0 8px; }
-  .foot { font-size: .85rem; color: var(--muted); text-align: center; }
+  .oops { color: var(--red); }
+  .timer { font: 700 3rem var(--hand); text-align: center; font-variant-numeric: tabular-nums; }
+  .stage { text-align: center; padding-block: 34px; display: flex; flex-direction: column; gap: 8px; }
+  .stage .name { font: 700 4rem/1 var(--hand); }
+  .stage .calm { font: 700 2.6rem/1.05 var(--hand); }
+  /* the session drawn as a line with a small circle where each note falls */
+  .line { position: relative; height: 26px; margin: 0 9px; }
+  .line::before { content: ""; position: absolute; left: 0; right: 0; top: 12px; border-top: 1.5px solid var(--rule); }
+  .line .gone { position: absolute; left: 0; top: 12px; border-top: 1.5px solid var(--ink); }
+  .line .dot { position: absolute; top: 5px; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--ink); }
+  .line .dot.heard { background: var(--ink); }
+  .ends { display: flex; justify-content: space-between; color: var(--pencil); font-size: .95rem; margin: 2px 9px 0; }
+  .foot { color: var(--pencil); font-size: .95rem; text-align: center; border-top: 1px solid var(--rule); padding-top: 16px; }
 </style>
 
 <main>
   <div class="top">
-    <span class="brand">nopa</span>
-    <span class="tag">demo · nothing leaves this page</span>
+    <b>nopa</b>
+    <span class="who-holds" id="holds">
+      <button class="txt" id="side-athlete">the athlete</button> · <button class="txt" id="side-supporter">a friend</button>
+    </span>
   </div>
 
-  <div class="sides" id="sides" role="group" aria-label="Whose screen">
-    <button id="side-athlete" aria-pressed="true">The athlete's app</button>
-    <button id="side-supporter" aria-pressed="false">A supporter's link</button>
-  </div>
-
-  <!-- ATHLETE: corner -->
-  <section class="view" id="v-corner">
-    <div>
-      <h1 id="c-name"></h1>
-      <p class="muted" id="c-date"></p>
+  <!-- ATHLETE: the plan -->
+  <section class="view" id="v-home">
+    <div class="group">
+      <h1 id="h-name"></h1>
+      <p class="soft" id="h-date"></p>
     </div>
-    <div class="streak"><strong id="a-streak-head"></strong><span class="muted small" id="a-streak-detail"></span></div>
-
-    <div class="card" id="c-waiting">
-      <h2 id="c-count"></h2>
-      <p class="muted">Roughly how long is today's session? Your notes will be spread through it.</p>
-      <div class="chips" id="c-durations" role="radiogroup" aria-label="Session length"></div>
-      <p class="small muted" id="c-plan"></p>
-      <button class="btn primary big" id="c-start">Start</button>
-      <p class="small muted">The real app offers 20 to 120 minutes. The demo uses short ones so you can watch the spacing.</p>
+    <p id="h-streak"></p>
+    <div class="group">
+      <h2>Your plan</h2>
+      <div class="plan" id="h-plan"></div>
+      <button class="txt soft" id="h-add">add a session</button>
     </div>
-    <div class="card" id="c-empty" hidden>
-      <h2>Nothing new yet</h2>
-      <p class="muted">When your people record a note it waits here for your next session. Share your link to invite them.</p>
+    <div class="group">
+      <button class="btn" id="h-share">Share your plan with your people</button>
+      <p class="soft">They pick the session they want to be there for.</p>
     </div>
-
-    <div class="card">
-      <h2>Invite your people</h2>
-      <p class="muted">Each corner has one private link. Anyone who has it can record a note for you. No app, no account.</p>
-      <button class="btn primary" id="c-open-link">Open the link as a supporter</button>
-    </div>
-
-    <div class="card" id="c-heard" hidden>
-      <h2 id="c-heard-title"></h2>
-      <div id="c-heard-list" style="display:flex;flex-direction:column;gap:10px"></div>
-    </div>
-
-    <button class="btn link" id="c-new">Start over with your own goal</button>
+    <button class="txt soft" id="h-new">start over with your own goal</button>
   </section>
 
-  <!-- ATHLETE: create -->
-  <section class="view" id="v-create" hidden>
-    <div>
-      <h1>New corner</h1>
-      <p class="muted">A corner is where your people gather around one goal. Name the goal and the day you finish.</p>
+  <!-- ATHLETE: one session -->
+  <section class="view" id="v-ready" hidden>
+    <button class="txt soft" id="r-back">back to the plan</button>
+    <div class="group">
+      <h1 id="r-what"></h1>
+      <p class="soft" id="r-when"></p>
     </div>
-    <div><label for="n-name">Your goal</label><input type="text" id="n-name" maxlength="80" placeholder="Berlin Marathon"></div>
-    <div>
-      <label for="n-day">Finish date</label>
-      <div class="date">
-        <input type="number" id="n-day" inputmode="numeric" placeholder="DD" aria-label="Day">
-        <input type="number" id="n-month" inputmode="numeric" placeholder="MM" aria-label="Month">
-        <input type="number" id="n-year" inputmode="numeric" placeholder="YYYY" aria-label="Year">
-      </div>
-    </div>
-    <p class="error" id="n-error" role="alert" hidden></p>
-    <button class="btn primary" id="n-create">Create corner</button>
-    <button class="btn link" id="n-cancel">Cancel</button>
+    <p id="r-notes"></p>
+    <button class="btn main" id="r-start">Start</button>
+    <p class="soft" id="r-hint"></p>
   </section>
 
-  <!-- ATHLETE: session -->
+  <!-- ATHLETE: add a session -->
+  <section class="view" id="v-add" hidden>
+    <h1>A session</h1>
+    <div><label for="a-what">What is it?</label><input type="text" id="a-what" maxlength="40" placeholder="Tempo run"></div>
+    <div class="two">
+      <div><label for="a-day">When?</label><select id="a-day"></select></div>
+      <div><label for="a-long">How long?</label><select id="a-long"></select></div>
+    </div>
+    <p class="oops" id="a-oops" role="alert" hidden></p>
+    <button class="btn" id="a-save">Add to the plan</button>
+    <button class="txt soft" id="a-cancel">never mind</button>
+    <p class="soft">The real app would bring in a whole plan at once, from a file or your calendar.</p>
+  </section>
+
+  <!-- ATHLETE: new goal -->
+  <section class="view" id="v-goal" hidden>
+    <h1>Your goal</h1>
+    <div><label for="g-name">What are you working towards?</label><input type="text" id="g-name" maxlength="60" placeholder="Berlin Marathon"></div>
+    <div><label for="g-when">The day you finish</label><input type="text" id="g-when" inputmode="numeric" placeholder="26/09/2027"></div>
+    <p class="oops" id="g-oops" role="alert" hidden></p>
+    <button class="btn" id="g-save">Begin</button>
+    <button class="txt soft" id="g-cancel">never mind</button>
+  </section>
+
+  <!-- ATHLETE: during -->
   <section class="view" id="v-session" hidden>
-    <h1 id="s-name"></h1>
+    <p class="soft" id="s-what"></p>
     <div class="stage" id="s-stage"></div>
     <div>
       <div class="line" id="s-line"></div>
-      <div class="ends"><span>0:00</span><span id="s-end"></span></div>
+      <div class="ends"><span>start</span><span id="s-end"></span></div>
     </div>
-    <p class="muted" style="text-align:center" id="s-progress"></p>
-    <button class="btn" id="s-stop">End session</button>
-    <p class="small muted" style="text-align:center">In the real app you lock the phone here and your own music keeps playing, dipping under each note. This page has to stay open instead.</p>
+    <button class="txt soft" id="s-stop" style="align-self:center">end the session</button>
+    <p class="soft" style="text-align:center">The demo runs the whole session in one minute. In the real app the phone is locked in your pocket and your own music carries on underneath.</p>
   </section>
 
-  <!-- ATHLETE: session over -->
-  <section class="view" id="v-done" hidden>
-    <h1 id="d-title"></h1>
-    <p class="muted" id="d-summary"></p>
-    <button class="btn primary" id="d-ok">Done</button>
+  <!-- ATHLETE: after -->
+  <section class="view" id="v-after" hidden>
+    <h1 id="f-title"></h1>
+    <p id="f-line"></p>
+    <button class="btn" id="f-ok">Back to the plan</button>
   </section>
 
-  <!-- SUPPORTER -->
-  <section class="view" id="v-supporter" hidden>
-    <div>
-      <p class="muted">You've been invited into the corner for</p>
+  <!-- FRIEND: pick a session -->
+  <section class="view" id="v-pick" hidden>
+    <div class="group">
+      <p class="soft">You're invited along on the way to</p>
       <h1 id="p-name"></h1>
-      <p class="muted" id="p-date"></p>
+      <p class="soft" id="p-date"></p>
     </div>
-    <p class="streak" id="p-streak"></p>
-
-    <div class="card" id="p-record">
-      <p>Record a short voice note. They'll hear it during a training session on the way to this goal: a hello, a memory, anything you'd say if you were alongside.</p>
-      <div class="timer" id="p-timer" hidden>0:00</div>
-      <button class="btn primary" id="p-rec">Record a note</button>
-      <p class="small muted">Up to one minute. You can listen before you send.</p>
-      <div id="p-fallback" hidden style="display:flex;flex-direction:column;gap:10px">
-        <p class="small" id="p-fallback-why"></p>
-        <button class="btn" id="p-file-btn">Use your phone's recorder</button>
-        <input type="file" id="p-file" accept="audio/*" capture hidden>
-        <button class="btn" id="p-write-btn">Write it instead</button>
-      </div>
-      <p class="error" id="p-rec-error" role="alert" hidden></p>
-    </div>
-
-    <div class="card" id="p-review" hidden>
-      <h2 id="p-review-title">Have a listen</h2>
-      <audio id="p-preview" controls hidden></audio>
-      <div id="p-text-wrap" hidden>
-        <label for="p-text">What would you say?</label>
-        <textarea id="p-text" maxlength="400" placeholder="Hey, it's me. Thinking of you out there today…"></textarea>
-        <p class="small muted">In this demo a written note is read aloud by a synthetic voice.</p>
-      </div>
-      <div><label for="p-first">Your first name</label><input type="text" id="p-first" maxlength="40" autocomplete="given-name" placeholder="So they know it's you"></div>
-      <p class="error" id="p-send-error" role="alert" hidden></p>
-      <button class="btn primary" id="p-send">Send note</button>
-      <button class="btn" id="p-redo">Start again</button>
-    </div>
-
-    <div class="card" id="p-sent" hidden>
-      <h2>Thank you, it's on its way</h2>
-      <p id="p-sent-line"></p>
-      <div id="p-contact-form" style="display:flex;flex-direction:column;gap:10px">
-        <div><label for="p-contact">Want to know when they've listened?</label><input type="text" id="p-contact" maxlength="200" placeholder="Email or phone number (optional)"></div>
-        <button class="btn primary" id="p-contact-save">Let me know</button>
-        <button class="btn link" id="p-contact-skip">No thanks</button>
-      </div>
-      <p id="p-contact-done" hidden></p>
-      <button class="btn" id="p-another" hidden>Record another note</button>
-      <button class="btn primary" id="p-to-athlete" hidden>See it arrive in the athlete's app</button>
+    <p id="p-streak"></p>
+    <div class="group">
+      <h2>Which one would you like to be there for?</h2>
+      <div class="plan" id="p-plan"></div>
     </div>
   </section>
 
-  <p class="foot">Everything here lives in this page and resets when you reload. Example notes are marked as examples.</p>
+  <!-- FRIEND: leave the note -->
+  <section class="view" id="v-note" hidden>
+    <button class="txt soft" id="n-back">choose another session</button>
+    <div class="group">
+      <h1 id="n-for"></h1>
+      <p class="soft">Say hello, share a memory, anything you'd say if you were alongside. Up to a minute.</p>
+    </div>
+
+    <div class="group" id="n-record">
+      <div class="timer" id="n-timer" hidden>0:00</div>
+      <button class="btn main" id="n-rec">Record</button>
+      <div class="group" id="n-other" hidden>
+        <p class="soft" id="n-why"></p>
+        <button class="btn" id="n-file-btn">Use your phone's recorder</button>
+        <input type="file" id="n-file" accept="audio/*" capture hidden>
+        <button class="btn" id="n-write-btn">Write it instead</button>
+      </div>
+      <p class="oops" id="n-rec-oops" role="alert" hidden></p>
+    </div>
+
+    <div class="group" id="n-review" hidden style="gap:18px">
+      <audio id="n-preview" controls hidden></audio>
+      <div id="n-text-wrap" hidden>
+        <label for="n-text">What would you say?</label>
+        <textarea id="n-text" maxlength="400" placeholder="Hey, it's me…"></textarea>
+        <p class="soft">In the demo a written note is read out by a computer voice.</p>
+      </div>
+      <div><label for="n-first">Your first name</label><input type="text" id="n-first" maxlength="40" autocomplete="given-name"></div>
+      <p class="oops" id="n-send-oops" role="alert" hidden></p>
+      <button class="btn main" id="n-send">Send</button>
+      <button class="txt soft" id="n-redo" style="align-self:center">start again</button>
+    </div>
+  </section>
+
+  <!-- FRIEND: sent -->
+  <section class="view" id="v-sent" hidden>
+    <h1>Thank you</h1>
+    <p id="t-line"></p>
+    <div class="group" id="t-ask" style="gap:14px">
+      <div><label for="t-contact">Want to know when they've heard it? Leave an email or number.</label><input type="text" id="t-contact" maxlength="200" placeholder="optional"></div>
+      <button class="btn" id="t-save">Let me know</button>
+      <button class="txt soft" id="t-skip" style="align-self:center">no thanks</button>
+    </div>
+    <p id="t-done" hidden></p>
+    <div class="group" id="t-next" hidden>
+      <button class="btn" id="t-another">Leave another note</button>
+      <button class="txt soft" id="t-athlete" style="align-self:center">see it from the athlete's side</button>
+    </div>
+  </section>
+
+  <p class="foot">A demo. Everything stays on this page and is gone when you reload. Anna, Ben and Mum are examples.</p>
 </main>
 
 <audio id="note-audio" playsinline></audio>
@@ -232,11 +227,12 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var DAY = 864e5, WEEK = 7 * DAY;
+  var DAY = 864e5, WEEK = 7 * DAY, DEMO_MS = 60000;
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var VOICES = ['buttery', 'airy', 'glassy', 'rounded'];
-  var DURATIONS = [1, 2, 5];
-  // 0.3 s of silence: played on Start so later notes may play without another tap.
+  var LENGTHS = [30, 40, 45, 60, 75, 90, 120, 150, 180];
+  // A moment of silence, played on Start so later notes may play without another tap.
   var SILENCE = (function () {
     var n = 2400, b = new Uint8Array(44 + n), v = new DataView(b.buffer), s = function (o, t) { for (var i = 0; i < t.length; i++) b[o + i] = t.charCodeAt(i); };
     s(0, 'RIFF'); v.setUint32(4, 36 + n, true); s(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
@@ -247,34 +243,45 @@
 
   var now = Date.now();
   var state = {
-    side: 'athlete', view: 'corner', minutes: 1,
-    corner: { name: 'Berlin Marathon', finish: '2027-09-26' },
+    side: 'athlete', view: 'home', openId: null, pickId: null,
+    goal: { name: 'Berlin Marathon', finish: '2027-09-26' },
+    sessions: [
+      { id: 1, what: 'Easy run', inDays: 0, minutes: 40, done: false, heard: [] },
+      { id: 2, what: 'Intervals', inDays: 2, minutes: 60, done: false, heard: [] },
+      { id: 3, what: 'Long run', inDays: 4, minutes: 120, done: false, heard: [] },
+    ],
     notes: [
-      { id: 1, sender: 'Anna', example: true, createdAt: now - 2 * WEEK, heardAt: null,
-        text: "Hey, it's Anna. I'm thinking of you out there this morning. Remember that first rainy five k? Look how far you've come. Enjoy this one." },
-      { id: 2, sender: 'Ben', example: true, createdAt: now - WEEK, heardAt: null,
-        text: "Ben here. I saw the photos from Sunday's long run and you looked happy. Save a little for the hill. See you at dinner on Friday." },
+      { id: 1, sender: 'Ben', sessionId: 1, createdAt: now - WEEK, heardAt: null,
+        text: "Ben here. Nice and easy today, no heroics. I'll have the coffee on when you're back." },
+      { id: 2, sender: 'Anna', sessionId: 3, createdAt: now - 2 * WEEK, heardAt: null,
+        text: "Hey, it's Anna. I know the long ones get quiet in the middle. Remember that first rainy five k? Look how far you've come." },
+      { id: 3, sender: 'Mum', sessionId: 3, createdAt: now - WEEK, heardAt: null,
+        text: "It's Mum. I'm so proud of you. Drink something, and ring me when you're home." },
     ],
   };
-  var nextId = 3;
-  var session = null, draft = null, recording = null, sentNote = null, tts = null, wake = null;
+  var nextId = 10, session = null, draft = null, recording = null, sentNote = null, tts = null, wake = null;
 
-  if (window.claude && window.claude.use) {
-    window.claude.use('tts').then(function (t) { tts = t; }).catch(function () {});
-  }
+  if (window.claude && window.claude.use) window.claude.use('tts').then(function (t) { tts = t; }).catch(function () {});
 
-  // ---------- small helpers ----------
-  function fmtDate(iso) { var p = iso.split('-').map(Number); return p[2] + ' ' + MONTHS[p[1] - 1] + ' ' + p[0]; }
-  function daysUntil(iso) {
-    var p = iso.split('-').map(Number), t = new Date();
-    return Math.round((Date.UTC(p[0], p[1] - 1, p[2]) - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / DAY);
-  }
-  function mmss(ms) { var s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
-  function clock(ts) { var d = new Date(ts), p = function (n) { return (n < 10 ? '0' : '') + n; }; return d.getDate() + ' ' + MONTHS[d.getMonth()] + ', ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
+  // ---------- words ----------
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function waiting() { return state.notes.filter(function (n) { return !n.heardAt; }).sort(function (a, b) { return a.createdAt - b.createdAt; }); }
+  function fmtDate(iso) { var p = iso.split('-').map(Number); return p[2] + ' ' + MONTHS[p[1] - 1] + ' ' + p[0]; }
+  function daysUntil(iso) { var p = iso.split('-').map(Number), t = new Date(); return Math.round((Date.UTC(p[0], p[1] - 1, p[2]) - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / DAY); }
+  function dayName(inDays) { if (inDays === 0) return 'Today'; if (inDays === 1) return 'Tomorrow'; return DAYS[new Date(Date.now() + inDays * DAY).getDay()]; }
+  function howLong(min) { if (min < 60) return min + ' minutes'; var h = Math.floor(min / 60), m = min % 60; return (h === 1 ? '1 hour' : h + ' hours') + (m ? ' ' + m : ''); }
+  function shortLong(min) { if (min < 60) return min + ' min'; var h = Math.floor(min / 60), m = min % 60; return h + ' h' + (m ? ' ' + m : ''); }
+  function mmss(ms) { var s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
+  function names(list) { return list.length < 2 ? list.join('') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1]; }
+  function byId(id) { return state.sessions.filter(function (s) { return s.id === id; })[0]; }
+  function upcoming() { return state.sessions.filter(function (s) { return !s.done; }).sort(function (a, b) { return a.inDays - b.inDays; }); }
+  /** Notes a session will play: the ones left for it, plus any left for "whenever". */
+  function notesFor(s) {
+    return state.notes.filter(function (n) { return !n.heardAt && (n.sessionId === s.id || n.sessionId === null); })
+      .sort(function (a, b) { return a.createdAt - b.createdAt; });
+  }
+  function countFor(s) { return state.notes.filter(function (n) { return !n.heardAt && n.sessionId === s.id; }).length; }
 
-  // One streak for the whole corner: consecutive Monday-to-Sunday (UTC) weeks with a note from anyone.
+  // One streak for everyone: weeks in a row (Monday to Sunday) in which anyone left a note.
   function weekOf(ts) { return Math.floor((ts / DAY + 3) / 7); }
   function streak() {
     var weeks = {}; state.notes.forEach(function (n) { weeks[weekOf(n.createdAt)] = true; });
@@ -282,88 +289,87 @@
     while (weeks[w]) { count++; w--; }
     return { weeks: count, kept: kept };
   }
-  function planOffsets(n, durationMs) { var out = []; for (var i = 1; i <= n; i++) out.push(Math.round(durationMs * i / (n + 1))); return out; }
+  function streakLine(mine) {
+    var s = streak(), who = mine ? 'Your people have' : 'Their people have';
+    if (s.weeks === 0) return mine ? 'No notes yet. Share your plan and they will come.' : 'Be the first to leave a note this week.';
+    return who + ' been here ' + (s.weeks === 1 ? 'this week' : s.weeks + ' weeks in a row') + '.' + (s.kept || s.weeks === 1 ? '' : ' A note this week keeps it going.');
+  }
+  function planOffsets(n) { var out = []; for (var i = 1; i <= n; i++) out.push(Math.round(DEMO_MS * i / (n + 1))); return out; }
 
-  // ---------- render ----------
-  function show(view) { state.view = view; render(); window.scrollTo(0, 0); }
+  // ---------- drawing the page ----------
+  function go(view) { state.view = view; render(); window.scrollTo(0, 0); }
   function render() {
-    var inSession = state.view === 'session';
-    $('sides').hidden = inSession;
-    $('side-athlete').setAttribute('aria-pressed', String(state.side === 'athlete'));
-    $('side-supporter').setAttribute('aria-pressed', String(state.side === 'supporter'));
-    ['corner', 'create', 'session', 'done', 'supporter'].forEach(function (v) { $('v-' + v).hidden = true; });
-    if (state.side === 'supporter') { $('v-supporter').hidden = false; renderSupporter(); return; }
-    $('v-' + state.view).hidden = false;
-    if (state.view === 'corner') renderCorner();
-    if (state.view === 'session') renderSession();
+    $('holds').hidden = state.view === 'session';
+    $('side-athlete').style.color = state.side === 'athlete' ? 'var(--ink)' : '';
+    $('side-supporter').style.color = state.side === 'supporter' ? 'var(--ink)' : '';
+    ['home', 'ready', 'add', 'goal', 'session', 'after', 'pick', 'note', 'sent'].forEach(function (v) { $('v-' + v).hidden = v !== state.view; });
+    if (state.view === 'home') drawHome();
+    if (state.view === 'ready') drawReady();
+    if (state.view === 'pick') drawPick();
+    if (state.view === 'session') drawSession();
   }
-
-  function renderCorner() {
-    var c = state.corner, d = daysUntil(c.finish), s = streak(), w = waiting();
-    $('c-name').textContent = c.name;
-    $('c-date').textContent = fmtDate(c.finish) + (d > 0 ? ' · ' + d + (d === 1 ? ' day' : ' days') + ' to go' : d === 0 ? ' · today' : '');
-    if (s.weeks === 0) {
-      $('a-streak-head').textContent = 'Your corner is just getting started';
-      $('a-streak-detail').textContent = 'The first note in a week starts a streak your people share.';
-    } else {
-      $('a-streak-head').textContent = s.weeks === 1 ? 'Your corner has shared 1 week' : 'Your corner has shared ' + s.weeks + ' weeks in a row';
-      $('a-streak-detail').textContent = s.kept ? 'This week is already part of it.' : 'A note from anyone this week keeps it going.';
-    }
-    $('c-waiting').hidden = w.length === 0;
-    $('c-empty').hidden = w.length !== 0;
-    if (w.length) {
-      $('c-count').textContent = w.length === 1 ? '1 note is waiting for you' : w.length + ' notes are waiting for you';
-      var chips = $('c-durations'); chips.textContent = '';
-      DURATIONS.forEach(function (m) {
-        var b = el('button', null, m + ' min'); b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(m === state.minutes));
-        b.onclick = function () { state.minutes = m; renderCorner(); };
-        chips.appendChild(b);
-      });
-      var times = planOffsets(w.length, state.minutes * 60000).map(mmss);
-      $('c-plan').textContent = (w.length === 1 ? 'Your note will play at ' : 'Your notes will play at ') +
-        (times.length > 1 ? times.slice(0, -1).join(', ') + ' and ' + times[times.length - 1] : times[0]) + '. Nothing plays at the start.';
-    }
-    var heard = state.notes.filter(function (n) { return n.heardAt; }).sort(function (a, b) { return b.heardAt - a.heardAt; });
-    $('c-heard').hidden = heard.length === 0;
-    $('c-heard-title').textContent = heard.length === 1 ? '1 note heard' : heard.length + ' notes heard';
-    var list = $('c-heard-list'); list.textContent = '';
-    heard.forEach(function (n) {
-      var row = el('div', 'heard'); row.appendChild(el('b', null, n.sender + (n.example ? ' (example)' : '')));
-      row.appendChild(el('span', 'muted small', 'Heard ' + clock(n.heardAt))); list.appendChild(row);
+  function planRow(s, mark, onTap) {
+    var row = el(onTap ? 'button' : 'div', 'row' + (s.done ? ' done' : ''));
+    row.appendChild(el('span', 'day', dayName(s.inDays)));
+    row.appendChild(el('span', 'what', s.what + ', ' + howLong(s.minutes)));
+    if (mark) row.appendChild(el('span', 'mark', mark));
+    if (onTap) row.onclick = onTap;
+    return row;
+  }
+  function drawHome() {
+    var g = state.goal, d = daysUntil(g.finish);
+    $('h-name').textContent = g.name;
+    $('h-date').textContent = fmtDate(g.finish) + (d > 0 ? ', ' + d + (d === 1 ? ' day' : ' days') + ' to go' : d === 0 ? ', today' : '');
+    $('h-streak').textContent = streakLine(true);
+    var plan = $('h-plan'); plan.textContent = '';
+    state.sessions.slice().sort(function (a, b) { return a.inDays - b.inDays; }).forEach(function (s) {
+      if (s.done) { plan.appendChild(planRow(s, s.heard.length ? 'you heard ' + names(s.heard) : 'done')); return; }
+      var n = notesFor(s).length;
+      plan.appendChild(planRow(s, n === 0 ? 'no notes yet' : n === 1 ? '1 note tucked in' : n + ' notes tucked in', function () { state.openId = s.id; go('ready'); }));
     });
+    if (!state.sessions.length) plan.appendChild(el('p', 'soft', 'Nothing planned yet.'));
   }
-
-  function renderSupporter() {
-    var c = state.corner, s = streak();
-    $('p-name').textContent = c.name;
-    $('p-date').textContent = 'Finish day: ' + fmtDate(c.finish);
-    $('p-streak').textContent = s.weeks === 0 ? 'Be the first to share a moment this week.'
-      : 'This corner has shared ' + (s.weeks === 1 ? '1 week' : s.weeks + ' weeks in a row') + '. ' + (s.kept ? 'This week is already part of it.' : 'A note this week keeps it going.');
+  function drawReady() {
+    var s = byId(state.openId), n = notesFor(s).length;
+    $('r-what').textContent = s.what;
+    $('r-when').textContent = dayName(s.inDays) + ', ' + howLong(s.minutes);
+    $('r-notes').textContent = n === 0 ? 'Nobody has left a note for this one yet.' : n === 1 ? 'One note is tucked in for this one.' : n + ' notes are tucked in for this one.';
+    $('r-start').hidden = n === 0;
+    $('r-hint').textContent = n === 0 ? 'Share your plan and someone might.' : 'Tap Start, put your phone away, and go. They will find you along the way.';
   }
-
-  function renderSession() {
+  function drawPick() {
+    $('p-name').textContent = state.goal.name;
+    $('p-date').textContent = 'finishing on ' + fmtDate(state.goal.finish);
+    $('p-streak').textContent = streakLine(false);
+    var plan = $('p-plan'); plan.textContent = '';
+    upcoming().forEach(function (s) {
+      var n = countFor(s);
+      plan.appendChild(planRow(s, n === 0 ? 'nobody yet' : n === 1 ? '1 note so far' : n + ' notes so far', function () { state.pickId = s.id; openNote(); }));
+    });
+    var any = el('button', 'row');
+    any.appendChild(el('span', 'day', 'Any day')); any.appendChild(el('span', 'what', 'whenever they train next'));
+    any.onclick = function () { state.pickId = null; openNote(); };
+    plan.appendChild(any);
+  }
+  function drawSession() {
     if (!session) return;
-    var elapsed = Math.min(Date.now() - session.startedAt, session.durationMs), total = session.notes.length;
-    $('s-name').textContent = state.corner.name;
-    $('s-end').textContent = mmss(session.durationMs);
+    var s = session, elapsed = Math.min(Date.now() - s.startedAt, DEMO_MS);
+    $('s-what').textContent = s.sess.what + ', ' + howLong(s.sess.minutes);
+    $('s-end').textContent = shortLong(s.sess.minutes);
     var stage = $('s-stage'); stage.textContent = '';
-    if (session.playing) {
-      stage.appendChild(el('span', 'muted', 'With you now'));
-      stage.appendChild(el('span', 'who', session.playing.sender));
-      if (session.showText && session.playing.text) stage.appendChild(el('span', 'said', '“' + session.playing.text + '”'));
+    if (s.playing) {
+      stage.appendChild(el('span', 'soft', 'with you now'));
+      stage.appendChild(el('span', 'name', s.playing.sender));
+      if (s.showText && s.playing.text) stage.appendChild(el('span', null, '“' + s.playing.text + '”'));
     } else {
-      stage.appendChild(el('span', 'big', 'Put your phone away'));
-      var wait = session.next < total ? session.offsets[session.next] - (Date.now() - session.startedAt) : 0;
-      stage.appendChild(el('span', 'muted', 'Your next note comes in ' + mmss(wait)));
+      stage.appendChild(el('span', 'calm', 'Put your phone away'));
+      if (s.next < s.notes.length) stage.appendChild(el('span', 'soft', 'someone is coming in ' + mmss(s.offsets[s.next] - (Date.now() - s.startedAt))));
     }
     var line = $('s-line'); line.textContent = '';
-    var fill = el('div', 'fill'); fill.style.width = (elapsed / session.durationMs * 100) + '%'; line.appendChild(fill);
-    session.offsets.forEach(function (o, i) {
-      var dot = el('div', 'dot' + (i < session.next && !(session.playing && i === session.next - 1) ? ' done' : ''));
-      dot.style.left = (o / session.durationMs * 100) + '%'; line.appendChild(dot);
+    var gone = el('div', 'gone'); gone.style.width = (elapsed / DEMO_MS * 100) + '%'; line.appendChild(gone);
+    s.offsets.forEach(function (o, i) {
+      var dot = el('div', 'dot' + (s.notes[i].heardAt ? ' heard' : '')); dot.style.left = (o / DEMO_MS * 100) + '%'; line.appendChild(dot);
     });
-    var nowMark = el('div', 'now'); nowMark.style.left = (elapsed / session.durationMs * 100) + '%'; line.appendChild(nowMark);
-    $('s-progress').textContent = session.played + ' of ' + total + (total === 1 ? ' note' : ' notes') + ' heard';
   }
 
   // ---------- playing a note ----------
@@ -379,7 +385,7 @@
       setTimeout(function () { ctx.close(); }, 2500);
     } catch (e) {}
   }
-  // Resolves true when the note played to the end, false when it was cut short.
+  /** Resolves true when the note played to the end, false when it was cut short. */
   function playNote(note, index) {
     return new Promise(function (resolve) {
       var done = false, timers = [];
@@ -401,91 +407,86 @@
         timers.push(setTimeout(function () { finish(true); }, (note.durationMs || 60000) + 8000));
         return;
       }
-      function onScreen() {            // no voice here: a chime, and the words on screen
+      function onPaper() {             // no voice on this phone: a chime, and the words on the page
         if (done) return;
-        session.showText = true; renderSession(); chime();
+        session.showText = true; drawSession(); chime();
         timers.push(setTimeout(function () { finish(true); }, Math.max(5000, note.text.length * 70)));
       }
       function browserVoice() {
         if (done) return;
         var synth = window.speechSynthesis;
-        if (!synth || !window.SpeechSynthesisUtterance) return onScreen();
+        if (!synth || !window.SpeechSynthesisUtterance) return onPaper();
         try {
           var u = new SpeechSynthesisUtterance(note.text), started = false;
           u.rate = 0.95; u.onstart = function () { started = true; };
-          u.onend = function () { finish(true); }; u.onerror = function () { if (!done) onScreen(); };
+          u.onend = function () { finish(true); }; u.onerror = function () { if (!done) onPaper(); };
           synth.cancel(); synth.speak(u);
-          timers.push(setTimeout(function () { if (!started && !done) { try { synth.cancel(); } catch (e) {} onScreen(); } }, 2500));
-        } catch (e) { onScreen(); }
+          timers.push(setTimeout(function () { if (!started && !done) { try { synth.cancel(); } catch (e) {} onPaper(); } }, 2500));
+        } catch (e) { onPaper(); }
       }
-      if (tts) {
-        tts.speak(note.text, { voice: VOICES[index % VOICES.length] }).then(function () { finish(true); }, function () { browserVoice(); });
-      } else browserVoice();
+      if (tts) tts.speak(note.text, { voice: VOICES[index % VOICES.length] }).then(function () { finish(true); }, function () { browserVoice(); });
+      else browserVoice();
     });
   }
 
-  // ---------- session ----------
+  // ---------- a session ----------
   function startSession() {
-    var notes = waiting(); if (!notes.length) return;
-    var a = $('note-audio');                         // unlock audio while we still have the tap
+    var sess = byId(state.openId), notes = notesFor(sess); if (!notes.length) return;
+    var a = $('note-audio');                         // unlock sound while we still have the tap
     try { a.src = SILENCE; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
     try { if (window.speechSynthesis) { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; window.speechSynthesis.speak(u); } } catch (e) {}
     try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }, function () {}); } catch (e) {}
-    var durationMs = state.minutes * 60000;
-    session = { startedAt: Date.now(), durationMs: durationMs, notes: notes, offsets: planOffsets(notes.length, durationMs), next: 0, playing: null, played: 0, showText: false };
+    session = { sess: sess, startedAt: Date.now(), notes: notes, offsets: planOffsets(notes.length), next: 0, playing: null, showText: false, heard: [] };
     session.timer = setInterval(tick, 250);
-    show('session');
+    go('session');
   }
   function tick() {
     var s = session; if (!s) return;
-    if (s.playing || s.next >= s.notes.length || Date.now() - s.startedAt < s.offsets[s.next]) { renderSession(); return; }
-    var note = s.notes[s.next], index = s.next; s.next++; s.playing = note; s.showText = false; renderSession();
+    if (s.playing || s.next >= s.notes.length || Date.now() - s.startedAt < s.offsets[s.next]) { drawSession(); return; }
+    var note = s.notes[s.next], index = s.next; s.next++; s.playing = note; s.showText = false; drawSession();
     playNote(note, index).then(function (ok) {
-      if (session !== s) return;                     // the session was ended meanwhile
-      if (ok) { note.heardAt = Date.now(); s.played++; }
+      if (session !== s) return;                     // ended meanwhile
+      if (ok) { note.heardAt = Date.now(); s.heard.push(note.sender); }
       s.playing = null;
       if (s.next >= s.notes.length) endSession(true); else tick();
     });
   }
-  function endSession(completed) {
+  function endSession(all) {
     var s = session; if (!s) return;
     clearInterval(s.timer); session = null;
     if (stopCurrent) stopCurrent();
     try { if (wake) wake.release(); } catch (e) {} wake = null;
-    var left = s.notes.length - s.played;
-    $('d-title').textContent = completed ? "That's everyone for today" : 'Session ended';
-    $('d-summary').textContent = (s.played === 0 ? 'No notes played this time.' : s.played === 1 ? 'You heard 1 note.' : 'You heard ' + s.played + ' notes.') +
-      (left > 0 ? ' ' + (left === 1 ? '1 note is' : left + ' notes are') + ' still waiting for your next session.' : '');
-    show('done');
+    s.sess.done = true; s.sess.heard = s.heard;
+    var left = s.notes.filter(function (n) { return !n.heardAt; });
+    left.forEach(function (n) { n.sessionId = null; });   // not heard: they wait for the next session
+    $('f-title').textContent = all ? 'That was everyone' : 'Session ended';
+    $('f-line').textContent = (s.heard.length ? names(s.heard) + (s.heard.length === 1 ? ' was' : ' were') + ' with you today.' : 'Nobody got to say hello this time.') +
+      (left.length ? ' ' + (left.length === 1 ? 'One note is' : left.length + ' notes are') + ' saved for next time.' : '');
+    go('after');
   }
 
-  // ---------- supporter: recording ----------
-  function supporterStep(step) {
-    ['record', 'review', 'sent'].forEach(function (s) { $('p-' + s).hidden = s !== step; });
-  }
+  // ---------- a friend leaves a note ----------
+  function noteStep(step) { $('n-record').hidden = step !== 'record'; $('n-review').hidden = step !== 'review'; }
   function resetRecord() {
-    $('p-timer').hidden = true; $('p-rec').textContent = 'Record a note'; $('p-rec').className = 'btn primary'; $('p-rec').disabled = false;
-    $('p-rec-error').hidden = true;
+    $('n-timer').hidden = true; $('n-rec').textContent = 'Record'; $('n-rec').className = 'btn main'; $('n-rec-oops').hidden = true;
   }
-  function offerFallback(why) {
-    resetRecord();
-    $('p-fallback-why').textContent = why;
-    $('p-fallback').hidden = false;
+  function openNote() {
+    var s = state.pickId === null ? null : byId(state.pickId);
+    $('n-for').textContent = s ? 'For ' + (s.inDays < 2 ? dayName(s.inDays).toLowerCase() + "'s " : dayName(s.inDays) + "'s ") + s.what.toLowerCase() : 'For whenever they train next';
+    draft = null; resetRecord(); $('n-other').hidden = true; noteStep('record'); go('note');
   }
+  function otherWays(why) { resetRecord(); $('n-why').textContent = why; $('n-other').hidden = false; }
   function toReview(d) {
     draft = d;
-    var isText = !d.url;
-    $('p-review-title').textContent = isText ? 'Write your note' : 'Have a listen';
-    $('p-preview').hidden = isText; $('p-text-wrap').hidden = !isText;
-    if (!isText) $('p-preview').src = d.url;
-    $('p-send-error').hidden = true;
-    supporterStep('review');
+    var written = !d.url;
+    $('n-preview').hidden = written; $('n-text-wrap').hidden = !written;
+    if (!written) $('n-preview').src = d.url;
+    $('n-send-oops').hidden = true;
+    noteStep('review');
   }
   function startRecording() {
-    $('p-rec-error').hidden = true;
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-      return offerFallback("This browser can't record inside the page. Two other ways to leave a note:");
-    }
+    $('n-rec-oops').hidden = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) return otherWays("This browser can't record inside the page. Two other ways:");
     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
       var rec = new MediaRecorder(stream), chunks = [], startedAt = Date.now();
       rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
@@ -493,84 +494,92 @@
         stream.getTracks().forEach(function (t) { t.stop(); });
         clearInterval(recording.tick); clearTimeout(recording.cap); recording = null; resetRecord();
         var ms = Date.now() - startedAt;
-        if (ms < 500 || !chunks.length) { $('p-rec-error').textContent = "That recording didn't come through. Please try once more."; $('p-rec-error').hidden = false; return; }
+        if (ms < 500 || !chunks.length) { $('n-rec-oops').textContent = "That didn't come through. Please try once more."; $('n-rec-oops').hidden = false; return; }
         toReview({ url: URL.createObjectURL(new Blob(chunks, { type: rec.mimeType || '' })), durationMs: ms });
       };
       recording = { rec: rec };
-      recording.tick = setInterval(function () { $('p-timer').textContent = mmss(Date.now() - startedAt); }, 250);
+      recording.tick = setInterval(function () { $('n-timer').textContent = mmss(Date.now() - startedAt); }, 250);
       recording.cap = setTimeout(function () { if (rec.state !== 'inactive') rec.stop(); }, 60000);
       rec.start();
-      $('p-timer').textContent = '0:00'; $('p-timer').hidden = false; $('p-rec').textContent = 'Stop'; $('p-rec').className = 'btn rec';
+      $('n-timer').textContent = '0:00'; $('n-timer').hidden = false; $('n-rec').textContent = 'Stop'; $('n-rec').className = 'btn main red';
     }).catch(function () {
-      offerFallback("This preview isn't allowed to use the microphone. The real page records right here. For now, two other ways to leave a note:");
+      otherWays("This preview isn't allowed to use the microphone. The real page records right here. For now, two other ways:");
     });
   }
   function sendNote() {
-    var first = $('p-first').value.trim(), text = $('p-text').value.trim(), err = $('p-send-error');
-    err.hidden = true;
-    if (!draft.url && !text) { err.textContent = 'Write a few words first.'; err.hidden = false; return; }
-    if (!first) { err.textContent = 'Please add your first name so they know who it is from.'; err.hidden = false; $('p-first').focus(); return; }
-    $('p-preview').pause();
-    sentNote = { id: nextId++, sender: first, createdAt: Date.now(), heardAt: null, url: draft.url || null, durationMs: draft.durationMs || 0, text: draft.url ? '' : text, contact: null };
-    state.notes.push(sentNote); draft = null;
-    $('p-sent-line').textContent = 'Your note will be waiting for a training session on the way to ' + state.corner.name + '.';
-    $('p-contact').value = ''; $('p-contact-form').hidden = false;
-    $('p-contact-done').hidden = true; $('p-another').hidden = true; $('p-to-athlete').hidden = true;
-    $('p-text').value = '';
-    supporterStep('sent'); renderSupporter();
+    var first = $('n-first').value.trim(), text = $('n-text').value.trim(), oops = $('n-send-oops');
+    oops.hidden = true;
+    if (!draft.url && !text) { oops.textContent = 'Write a few words first.'; oops.hidden = false; return; }
+    if (!first) { oops.textContent = 'Add your first name, so they know it is you.'; oops.hidden = false; $('n-first').focus(); return; }
+    $('n-preview').pause();
+    sentNote = { id: nextId++, sender: first, sessionId: state.pickId, createdAt: Date.now(), heardAt: null, url: draft.url || null, durationMs: draft.durationMs || 0, text: draft.url ? '' : text, contact: null };
+    state.notes.push(sentNote); draft = null; $('n-text').value = '';
+    var s = state.pickId === null ? null : byId(state.pickId);
+    $('t-line').textContent = s ? 'They will hear you somewhere along ' + (s.inDays < 2 ? dayName(s.inDays).toLowerCase() : dayName(s.inDays)) + "'s " + s.what.toLowerCase() + '.' : 'They will hear you the next time they train.';
+    $('t-contact').value = ''; $('t-ask').hidden = false; $('t-done').hidden = true; $('t-next').hidden = true;
+    go('sent');
   }
-  function contactDone(msg) {
-    $('p-contact-form').hidden = true; $('p-contact-done').textContent = msg; $('p-contact-done').hidden = false;
-    $('p-another').hidden = false; $('p-to-athlete').hidden = false;
-  }
+  function contactDone(msg) { $('t-ask').hidden = true; $('t-done').textContent = msg; $('t-done').hidden = false; $('t-next').hidden = false; }
 
-  // ---------- athlete: create ----------
-  function createCorner() {
-    var name = $('n-name').value.trim(), d = Number($('n-day').value), m = Number($('n-month').value), y = Number($('n-year').value), err = $('n-error');
-    function fail(msg) { err.textContent = msg; err.hidden = false; }
+  // ---------- the athlete's own entries ----------
+  function fillSelects() {
+    var day = $('a-day'), long = $('a-long'); day.textContent = ''; long.textContent = '';
+    for (var i = 0; i < 14; i++) { var o = el('option', null, i < 2 ? dayName(i) : dayName(i) + ' ' + new Date(Date.now() + i * DAY).getDate()); o.value = i; day.appendChild(o); }
+    LENGTHS.forEach(function (m) { var o = el('option', null, howLong(m)); o.value = m; if (m === 60) o.selected = true; long.appendChild(o); });
+  }
+  function addSession() {
+    var what = $('a-what').value.trim();
+    if (!what) { $('a-oops').textContent = 'Give it a name, like "Tempo run".'; $('a-oops').hidden = false; return; }
+    state.sessions.push({ id: nextId++, what: what, inDays: Number($('a-day').value), minutes: Number($('a-long').value), done: false, heard: [] });
+    $('a-what').value = ''; go('home');
+  }
+  function saveGoal() {
+    var name = $('g-name').value.trim(), m = /^(\d{1,2})[\/.\- ](\d{1,2})[\/.\- ](\d{4})$/.exec($('g-when').value.trim()), oops = $('g-oops');
+    function fail(t) { oops.textContent = t; oops.hidden = false; }
     if (!name) return fail('Give your goal a name.');
-    if (!$('n-day').value || !$('n-month').value || !$('n-year').value) return fail('Add the finish date: day, month and year.');
-    var date = new Date(y, m - 1, d);
-    if (y < 1000 || date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return fail("That date doesn't exist. Check the day, month and year.");
-    var p = function (n) { return (n < 10 ? '0' : '') + n; }, iso = y + '-' + p(m) + '-' + p(d), t = new Date();
-    if (iso < t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate())) return fail('The finish date has already passed. Pick today or later.');
-    err.hidden = true;
-    state.corner = { name: name, finish: iso }; state.notes = [];
-    show('corner');
+    if (!m) return fail('Write the day like 26/09/2027.');
+    var d = Number(m[1]), mo = Number(m[2]), y = Number(m[3]), date = new Date(y, mo - 1, d);
+    if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return fail("That day doesn't exist.");
+    var p = function (n) { return (n < 10 ? '0' : '') + n; }, iso = y + '-' + p(mo) + '-' + p(d), t = new Date();
+    if (iso < t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate())) return fail('That day has already passed.');
+    oops.hidden = true;
+    state.goal = { name: name, finish: iso }; state.sessions = []; state.notes = [];
+    go('home');
   }
 
-  // ---------- wiring ----------
-  $('side-athlete').onclick = function () { state.side = 'athlete'; render(); };
-  $('side-supporter').onclick = function () { state.side = 'supporter'; render(); };
-  $('c-start').onclick = startSession;
-  $('c-open-link').onclick = function () { state.side = 'supporter'; supporterStep('record'); resetRecord(); render(); window.scrollTo(0, 0); };
-  $('c-new').onclick = function () { $('n-error').hidden = true; show('create'); };
-  $('n-create').onclick = createCorner;
-  $('n-cancel').onclick = function () { show('corner'); };
+  // ---------- taps ----------
+  $('side-athlete').onclick = function () { state.side = 'athlete'; go('home'); };
+  $('side-supporter').onclick = $('h-share').onclick = function () { state.side = 'supporter'; go('pick'); };
+  $('h-add').onclick = function () { $('a-oops').hidden = true; fillSelects(); go('add'); };
+  $('h-new').onclick = function () { $('g-oops').hidden = true; go('goal'); };
+  $('a-save').onclick = addSession; $('a-cancel').onclick = function () { go('home'); };
+  $('g-save').onclick = saveGoal; $('g-cancel').onclick = function () { go('home'); };
+  $('r-back').onclick = function () { go('home'); };
+  $('r-start').onclick = startSession;
   $('s-stop').onclick = function () { endSession(false); };
-  $('d-ok').onclick = function () { show('corner'); };
-  $('p-rec').onclick = function () { if (recording) { if (recording.rec.state !== 'inactive') recording.rec.stop(); } else startRecording(); };
-  $('p-file-btn').onclick = function () { $('p-file').click(); };
-  $('p-file').onchange = function () {
+  $('f-ok').onclick = function () { go('home'); };
+  $('n-back').onclick = function () { if (recording && recording.rec.state !== 'inactive') recording.rec.stop(); go('pick'); };
+  $('n-rec').onclick = function () { if (recording) { if (recording.rec.state !== 'inactive') recording.rec.stop(); } else startRecording(); };
+  $('n-file-btn').onclick = function () { $('n-file').click(); };
+  $('n-file').onchange = function () {
     var f = this.files && this.files[0]; this.value = '';
     if (!f) return;
     var url = URL.createObjectURL(f), probe = new Audio();
     probe.onloadedmetadata = function () { toReview({ url: url, durationMs: isFinite(probe.duration) ? Math.round(probe.duration * 1000) : 60000 }); };
-    probe.onerror = function () { $('p-rec-error').textContent = "That file isn't a sound this phone can play. Try another, or write your note."; $('p-rec-error').hidden = false; };
+    probe.onerror = function () { $('n-rec-oops').textContent = "This phone can't play that file. Try another, or write your note."; $('n-rec-oops').hidden = false; };
     probe.src = url;
   };
-  $('p-write-btn').onclick = function () { toReview({ url: null }); };
-  $('p-send').onclick = sendNote;
-  $('p-redo').onclick = function () { $('p-preview').pause(); draft = null; supporterStep('record'); };
-  $('p-contact-save').onclick = function () {
-    var c = $('p-contact').value.trim();
-    if (c.length < 3) { $('p-contact').focus(); return; }
-    sentNote.contact = c;
-    contactDone("Lovely. We'll let you know when they've listened. (The demo keeps this on the page and sends nothing.)");
+  $('n-write-btn').onclick = function () { toReview({ url: null }); };
+  $('n-send').onclick = sendNote;
+  $('n-redo').onclick = function () { $('n-preview').pause(); draft = null; noteStep('record'); };
+  $('t-save').onclick = function () {
+    var c = $('t-contact').value.trim();
+    if (c.length < 3) { $('t-contact').focus(); return; }
+    sentNote.contact = c; contactDone("We'll let you know. (The demo keeps this on the page and sends nothing.)");
   };
-  $('p-contact-skip').onclick = function () { contactDone('All done. Thank you for being in their corner.'); };
-  $('p-another').onclick = function () { supporterStep('record'); };
-  $('p-to-athlete').onclick = function () { state.side = 'athlete'; show('corner'); };
+  $('t-skip').onclick = function () { contactDone('All done. Thank you for coming along.'); };
+  $('t-another').onclick = function () { go('pick'); };
+  $('t-athlete').onclick = function () { state.side = 'athlete'; go('home'); };
 
   render();
 })();
