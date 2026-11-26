@@ -35,3 +35,19 @@ scroll. Not checked on a real phone.
 The handwriting was too much. The look is now a studio timetable: a refined serif for names
 and moments, a light sans with small spaced capitals for labels, one muted sage, pill
 buttons, more white space. Flow and wording unchanged. Re-run of the same check: passes.
+
+## Revision 2 (26 Nov)
+Eric: closer, but a little sterile; and the plan should come either from elsewhere (Garmin,
+Polar and the like) or be set up in the app.
+- **Warmer:** warmer paper, a soft wash behind the title, the next session lifted into a
+  rounded panel, a dot for each note, the streak sentence in italic serif, one slow
+  "breathing" circle behind the name of whoever is with you.
+- **Plan setup, two ways:** "A typical week" (pick what each weekday holds; it repeats until
+  the finish day) and "Bring it in" (paste a plan as text; Claude turns it into sessions).
+- **Finding on direct import:** Garmin's Training API is for publishing workouts *to* Garmin
+  (business tiers), and Polar's AccessLink exposes completed training; no documented way
+  was found for a third party to read an athlete's planned sessions from either. Needs
+  confirming with both before promising a "connect Garmin" button.
+- Checked in Chromium: typical week replaces the plan and keeps heard sessions; notes left
+  for a removed session wait for the next one. The pasted-plan path could not be run here
+  (it needs the artifact viewer); only its empty and unavailable states were checked.
