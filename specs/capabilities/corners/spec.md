@@ -1,24 +1,27 @@
 # Capability: corners
 
-A corner is the place for one goal: a name and a finish date, owned by one athlete.
+A corner is the place for one goal: a name and a finish date, owned by one athlete. People
+read "goal"; `corner` is the word in the code and the database.
 
-Status: built in change 003. App: `athlete/src/screens/`, `athlete/src/lib/corner.ts`.
+Status: built in change 003; first name and new look in change 009. App: `athlete/src/screens/`, `athlete/src/lib/corner.ts`.
 Server rules: `supabase/migrations/*corners_athlete_access.sql`. Verified by
 `athlete/src/lib/corner.test.ts`, `e2e/athlete-corners.spec.mjs`, `e2e/db.test.mjs`.
 
 ## Requirements
 
 ### R1 — Create a corner
-The system SHALL let an athlete create a corner with a goal name (1–80 characters) and a
-finish date of today or later, entered as day, month and year. Corners cannot be edited or
+The system SHALL let an athlete create a corner with their first name (shown to supporters),
+a goal name (1–80 characters) and a finish date of today or later, entered as day, month and
+year. The goal can be anything athletic: a first 10K, a mountain, a long ride. After
+creating it the athlete is taken to their usual week (see `plan`). Corners cannot be edited or
 deleted yet.
 
 - GIVEN an athlete with the app open
-  WHEN they enter the name "Berlin Marathon" and a finish date in the future and confirm
-  THEN a corner with that name and date exists and is shown to them.
+  WHEN they enter their first name, the goal "My first 10K" and a day in the future
+  THEN a corner with that name and date exists, and they are asked about their usual week.
 
 - GIVEN an athlete on the create form
-  WHEN the name is empty or the finish date is missing, malformed or in the past
+  WHEN the first name or goal is empty, or the date is missing, malformed or in the past
   THEN no corner is created and the form says what is missing.
 
 ### R2 — No sign-up for the athlete

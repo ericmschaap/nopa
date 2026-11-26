@@ -48,8 +48,9 @@ None of these could be checked in the build environment (no phone, no simulator)
 - [ ] **Share sheet:** on a corner, tap "Share link" and send it to yourself. The web build
       used in tests only copies the link, so the native share sheet is unchecked.
 - [ ] **Locked-screen session (the big one).** In a development build (it has a 2-minute
-      option): send yourself two notes, start a 2 min session, lock the phone. Expect notes
-      at about 0:40 and 1:20. Then repeat with a 20 min session and the phone in a pocket.
+      "start as a 2-minute test" link under Start): leave yourself two messages for today, start
+      the test, lock the phone. Expect them at about 0:40 and 1:20. Then repeat with a real
+      20 or 30 minute session and the phone in a pocket.
       Do it on iPhone and on Android.
 - [ ] **Ducking.** Same test with Spotify / Apple Music / a podcast playing. Expect: your
       audio keeps playing between notes at normal volume, gets quieter under each note, and
@@ -71,10 +72,13 @@ None of these could be checked in the build environment (no phone, no simulator)
 Each was settled the simplest way so the build could carry on; the reasoning is in the
 archived proposals under `specs/changes/archive/`.
 
-- **Note length cap: 60 seconds.** Longer or shorter?
-- **No cap on notes per session.** 30 unheard notes in 20 minutes plays one every ~40
-  seconds. Want a minimum gap, with the rest held for next time?
-- **Durations offered:** 20 / 30 / 45 / 60 / 90 / 120 minutes.
+- **Message length cap: 60 seconds.** Longer or shorter?
+- **Three kinds of session: easy, hard, long.** Enough, or do you want a fourth?
+- **Friends see how many messages each day has**, never from whom.
+- **A message not heard on its day moves to the next session.**
+- **The athlete's first name** is asked with the goal and shown on the link.
+- **No cap on messages per session.** Want a minimum gap, with the rest held for next time?
+- **Session lengths offered in the plan:** 20 / 30 / 45 / 60 / 75 / 90 / 120 / 180 minutes.
 - **Weeks for the streak run Monday–Sunday in UTC**, the same for everyone in a corner.
 - **Athlete identity is an anonymous account on the device.** Reinstalling loses the
   corners. Add email or Apple/Google sign-in before real users depend on it.

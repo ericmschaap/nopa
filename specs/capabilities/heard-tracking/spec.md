@@ -2,7 +2,7 @@
 
 A note is marked as heard, with the time, once the athlete has heard it.
 
-Status: built in change 005. Server: `mark_note_heard` in `supabase/migrations/`. App:
+Status: built in change 005; shown per calendar day since change 009. Server: `mark_note_heard` in `supabase/migrations/`. App:
 `athlete/src/lib/heardOutbox.ts`, `heard.ts`, heard list in `CornerScreen.tsx`. Verified by
 `heardOutbox.test.ts`, `e2e/heard.spec.mjs`, `e2e/db.test.mjs`.
 
@@ -53,9 +53,9 @@ keep the first timestamp if a note is marked again.
   THEN the time is brought into the range from the note's creation to now.
 
 ### R5 — The athlete can see what has been heard
-The system SHALL show the athlete, per corner, how many notes are waiting and which have
-been heard.
+The system SHALL show the athlete, on each calendar day, how many messages are waiting, and
+on a day when messages were heard, who was with them.
 
-- GIVEN a corner with 1 unheard and 2 heard notes
-  WHEN the athlete opens the corner
-  THEN they see 1 note waiting, and the 2 heard notes with sender and when they were heard.
+- GIVEN a session in which Anna's message played to the end
+  WHEN the athlete taps that day afterwards
+  THEN they read "Anna was with you." and that no message is waiting there.

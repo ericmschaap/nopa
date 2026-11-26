@@ -2,7 +2,7 @@
 
 The athlete taps Start, puts the phone away, and hears their people through the session.
 
-Status: built in change 004. Logic: `athlete/src/lib/schedule.ts`, `session.ts`. Audio:
+Status: built in change 004; length and choice of messages now come from the plan (change 009). Logic: `athlete/src/lib/schedule.ts`, `session.ts`. Audio:
 `athlete/src/lib/audio.ts` (expo-audio). Screens: `CornerScreen.tsx`, `SessionScreen.tsx`.
 Verified by unit tests beside the logic and `e2e/session.spec.mjs` (web build).
 **R3 (screen locked) and R4 (ducking) are implemented but only checkable on a real phone —
@@ -10,23 +10,23 @@ see `NEEDS-ERIC.md`.**
 
 ## Requirements
 
-### R1 — Start a session with a rough duration
-The system SHALL let the athlete start a session for a corner by picking a rough duration
-(20, 30, 45, 60, 90 or 120 minutes; development builds add 2 minutes) and tapping Start.
+### R1 — Start a session from the plan
+The system SHALL let the athlete start a session by tapping its day on the calendar and
+tapping Start. The session's length is the planned length; nothing else is asked.
+(Development builds can also run it as a 2-minute test.)
 
-- GIVEN an athlete on a corner with unheard notes
-  WHEN they pick "45 min" and tap Start
-  THEN a session begins and they need to do nothing more.
+- GIVEN a 45-minute session with messages waiting
+  WHEN the athlete taps the day and taps Start
+  THEN a 45-minute session begins and they need to do nothing more.
 
-- GIVEN an athlete on a corner with no unheard notes
-  WHEN they look at the corner
-  THEN they are told there is nothing new yet, are pointed to the share link, and there is
-  no Start button.
+- GIVEN a planned day with no messages
+  WHEN the athlete taps it
+  THEN they read that no one has left a message there yet, and there is no Start button.
 
 ### R2 — Notes are spaced evenly, never bunched at the start
-The system SHALL spread all of the corner's unheard notes evenly across the session: with N
-notes and duration D, note i (1..N, oldest first) is due at D × i / (N + 1). There is no cap
-on N.
+The system SHALL play, in a session, the unheard messages left for that day, the "any time"
+ones, and any still unheard from an earlier day, spread evenly: with N messages and length
+D, message i (1..N, oldest first) is due at D × i / (N + 1). There is no cap on N.
 
 - GIVEN 3 unheard notes and a 40-minute session
   WHEN the session starts
@@ -39,6 +39,10 @@ on N.
 - GIVEN a note that becomes due while the previous note is still playing
   WHEN the previous note ends
   THEN the next one plays straight after it, never over it.
+
+- GIVEN a message left for a day the athlete skipped, and an "any time" message
+  WHEN the athlete starts their next session
+  THEN both play in it, along with that day's own messages.
 
 - GIVEN the app's timer was delayed past a note's due time
   WHEN the timer next runs

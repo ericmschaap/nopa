@@ -1,8 +1,9 @@
 # Nopa
 
-Nopa (Luxembourgish for *neighbour*) lets the people around an athlete share the journey to a
-goal. Friends and family record short voice notes from a link; the athlete hears them spread
-through training sessions, over their own music, with the phone locked away.
+Nopa (Luxembourgish for *neighbour*) lets the people around someone working towards an
+athletic goal be there on the way. Friends and family pick a training day from a link and
+record a short voice message; the athlete hears them spread through that session, over their
+own music, with the phone locked away.
 
 This is a working first version of the whole loop. What is built is specified in
 [`specs/`](specs/project.md); what still needs a human is in [`NEEDS-ERIC.md`](NEEDS-ERIC.md);
@@ -35,22 +36,24 @@ cd athlete && npx expo start --web     # athlete app in a browser tab   (leave r
 
 ## Walk the full loop (in the browser, about 3 minutes)
 
-1. **Athlete:** in the athlete tab, name a goal and a finish date, tap **Create corner**.
-   You land on the corner with its share link. Tap **Copy link**.
-2. **Supporter:** paste the link into a new tab (or a private window: no account either way).
-   You see the goal and finish date. Tap **Record a note**, allow the microphone, say
-   something, tap **Stop**, listen back, type a first name, tap **Send note**. Optionally
-   leave an email or phone number, or tap **No thanks**.
-3. **Athlete:** back in the athlete tab tap **Check again**. "1 note is waiting for you".
-   Pick **2 min** (this option only exists in development builds) and tap **Start**.
-4. Wait about a minute: one note in a 2-minute session plays at the 1-minute mark. The screen
-   shows who is with you, then the session closes by itself.
-5. Tap **Done**. The note is now under "1 note heard" with the time, nothing is waiting, and
-   the streak line shows the corner's first week. Reload the supporter tab to see the same
-   streak there.
+1. **You:** in the athlete tab, give your first name, a goal and its day, tap **Begin**.
+   Accept the suggested usual week with **Fill my calendar**. You land on your calendar.
+   If today is not a training day, tap today and add "an easy one".
+2. Tap **Send your link** (in the browser this copies it).
+3. **A friend:** paste the link into a new tab or a private window. They see your goal, the
+   weeks side by side, and the calendar with a hollow dot under each training day. Tap
+   today, **Be the first**, **Record**, say something, **Stop**, listen back, add a first
+   name, **Send**. Leave a contact or tap **no thanks**.
+4. **You:** back in the athlete tab tap **look for new messages**. Today now has a dot and
+   "One message is waiting for you". Tap **start as a 2-minute test** (development builds
+   only; **Start** uses the planned length).
+5. Wait about a minute: one message in a 2-minute session plays at the 1-minute mark. The
+   screen shows who is with you, then the session closes by itself.
+6. Tap **Back to the calendar**. Today reads "Anna was with you." and the top of the screen
+   reads "One week side by side".
 
-Send two or three notes before starting to hear them spaced out (three notes in two minutes
-play at 0:30, 1:00 and 1:30).
+There is also a no-backend demo of both sides in `demo/nopa-demo.html`, published as a Claude
+artifact, for looking at the flow without running anything.
 
 ## Run it on a real phone
 
@@ -64,9 +67,9 @@ migrations, host `supporter/` somewhere with HTTPS, put the project's URL and an
 ## Tests
 
 ```bash
-npm test          # athlete: type check + 30 unit tests (spacing, session engine, outbox, ...)
-npm run db:test   # 30 tests of the server rules against local Supabase
-npm run e2e       # 28 Playwright tests: builds the athlete web app, then drives both sides
+npm test          # athlete: type check + 35 unit tests (plan, spacing, session engine, outbox, ...)
+npm run db:test   # 40 tests of the server rules against local Supabase
+npm run e2e       # 34 Playwright tests: builds the athlete web app, then drives both sides
 ```
 
 `npm run db:test` and `npm run e2e` need `npm run db:start` first. The e2e suite uses
@@ -81,8 +84,11 @@ that checks it in the archived change's `tasks.md`.
   streak by its link token; upload a WAV; attach a note (and optionally a contact) to it.
 - **Notes are WAV.** The supporter's browser converts whatever it recorded to mono 16-bit
   WAV, so every phone can play every note with no server transcoding.
-- **Spacing.** N unheard notes in a session of length D play at D × i / (N + 1): evenly
-  spread, never at the start.
+- **Plan.** A usual week (which days, and whether each is an easy, hard or long one) fills a
+  calendar. Friends pick a day from it, or "any time".
+- **Spacing.** A session plays the messages left for its day, the "any time" ones and any
+  missed earlier. N messages in a session of length D play at D × i / (N + 1): evenly spread,
+  never at the start.
 - **Phone away.** Notes are downloaded before the session starts. A silent track keeps the
   app alive in the background; around each note the audio mode switches to "duck others"
   and back, so the athlete's own audio dips and returns.

@@ -1,10 +1,11 @@
 # Progress
 
-All six changes are built, verified and archived. The loop works end to end against a local
-Supabase stack: a supporter records from a share link, the athlete's session plays the note
-at its spaced time, the note is marked heard, and the corner streak updates.
+The product now follows the direction Eric set on 26 November (see `specs/project.md`): a
+simple plan, a calendar with dots on both sides, friends pick a day or "any time", sessions
+take their length from the plan, the streak reads as weeks side by side, and the new look.
+The loop works end to end against a local Supabase stack.
 
-Test status at the last run: 30 unit, 30 database, 28 end-to-end, all passing.
+Test status at the last run: 35 unit, 40 database, 34 end-to-end, all passing.
 
 ## Changes
 
@@ -17,7 +18,8 @@ Test status at the last run: 30 unit, 30 database, 28 end-to-end, all passing.
 | 005 | heard-tracking | archived |
 | 006 | streak | archived |
 | 007 | phone-demo | archived (a demo page, not a product capability) |
-| 008 | plan-based-demo | archived (demo of a new direction; product not yet changed) |
+| 008 | plan-based-demo | archived (the demo that set the new direction) |
+| 009 | plan-and-calendar | archived (the product brought in line with the demo) |
 
 ## Stubbed
 
@@ -35,8 +37,13 @@ Test status at the last run: 30 unit, 30 database, 28 end-to-end, all passing.
 
 ## Known limits
 
-- **No cap on notes per session.** 30 unheard notes in a 20-minute session means a note
-  every ~40 seconds. A minimum gap is a product decision the brief does not make.
+- **No cap on messages per session.** Many messages in a short session play close together.
+- **No plan import.** The plan is set in the app only. Garmin and Polar do not appear to let
+  a third party read planned sessions (two quick searches, not confirmed with either).
+- **The calendar shows five weeks.** The plan is filled 12 weeks ahead, but later weeks are
+  not yet reachable on screen.
+- **The usual-week "every day is rest" message and the app's calendar dots** are not covered
+  by an automated test.
 - **Force-quitting the app ends a session**; unplayed notes stay unheard.
 - **Anonymous athlete account.** Reinstalling the app, or clearing its data, loses access to
   the corners.

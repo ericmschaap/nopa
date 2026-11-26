@@ -34,10 +34,29 @@ an email or phone number to hear when the athlete has listened. No sign-up.
 | session-playback | `capabilities/session-playback/spec.md` |
 | heard-tracking | `capabilities/heard-tracking/spec.md` |
 | streak | `capabilities/streak/spec.md` |
+| plan | `capabilities/plan/spec.md` |
+
+## Direction set on 26 November 2026
+
+After seeing a demo, Eric set these on top of the original brief:
+
+- **For anyone working towards an athletic goal** — a first 10K, a mountain, a long ride —
+  not for "proper" endurance athletes. No training jargon, no coach features.
+- **The basics come first:** send a link, people record a message, it plays when it is needed
+  most, in a training session.
+- **A simple plan and a calendar.** The athlete says which days they train and whether each
+  is an easy one, a hard one or a long one. The link shows that calendar; people pick a day
+  to be there for, or "any time".
+- **Dots.** Under each training day, a dot per message waiting and a hollow dot where no one
+  is yet.
+- **Weeks side by side.** The shared streak, said plainly and shown prominently.
+- **Look:** calm and plain. A serif for names and moments, a light sans for the rest, one
+  muted green, no boxes, no decoration.
+- **Words:** people read "message", "goal", "be there for Sam"; never "corner" or "note".
 
 ## Out of scope for now
 
-Training-calendar integration, smart timing based on workout data, the paid pro tier,
+Importing a plan from Garmin, Polar, a calendar or a file, smart timing based on workout data, the paid pro tier,
 verified fans, moderation tooling, payments, and actually sending the "they listened"
 notifications (the contact is stored only).
 
@@ -48,6 +67,7 @@ One repo, three parts:
 | Folder | What | Tech |
 | --- | --- | --- |
 | `athlete/` | Athlete app | Expo / React Native (TypeScript), `expo-audio` with the platform background-audio mode |
+| `demo/` | No-backend demo of both sides | One HTML file, published as a Claude artifact |
 | `supporter/` | Supporter page | Plain static HTML + JS, no build step, browser `MediaRecorder` |
 | `supabase/` | Backend | Supabase: Postgres (tables, RLS, SQL functions), anonymous auth, Storage for audio |
 | `e2e/` | End-to-end checks | Playwright, run against a local Supabase stack |

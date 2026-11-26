@@ -1,8 +1,9 @@
 # Capability: recording
 
-A supporter records a short voice note from the share link and sends it.
+A supporter records a short voice message from the share link and sends it. (People read
+"message"; the code and database say `note`.)
 
-Status: built in change 002. Page: `supporter/`. Server rules: `supabase/migrations/*recording*`.
+Status: built in change 002; choosing a day added in change 009. Page: `supporter/`. Server rules: `supabase/migrations/*recording*`.
 Verified by `e2e/supporter.spec.mjs` and `e2e/db.test.mjs`.
 
 ## Requirements
@@ -11,7 +12,7 @@ Verified by `e2e/supporter.spec.mjs` and `e2e/db.test.mjs`.
 The system SHALL let a supporter record a voice note of up to 60 seconds in the browser, and
 listen back or re-record before sending.
 
-- GIVEN a supporter on a valid share link
+- GIVEN a supporter who has picked a day (or "any time") on a valid share link
   WHEN they tap record, allow the microphone, speak, and tap stop
   THEN they can play the recording back, re-record it, or send it.
 
@@ -59,6 +60,20 @@ The system SHALL NOT expose a supporter's contact to the athlete or to other sup
 - GIVEN a note with a stored contact
   WHEN the athlete lists their notes, or anyone opens the share link
   THEN the contact is not included.
+
+### R6 — For a chosen day, or any time
+The system SHALL store with each message the session the supporter picked, or none for "any
+time", and SHALL refuse a session that belongs to another corner. Where the athlete has no
+plan yet, a message can still be left.
+
+- GIVEN a supporter who taps tomorrow's hard session and sends a message
+  WHEN it is stored
+  THEN it is attached to that session, and the supporter reads "Sam will hear you somewhere
+  along tomorrow's hard one."
+
+- GIVEN a supporter who chooses "Or any time"
+  WHEN they send a message
+  THEN it is attached to no session.
 
 ### R5 — Playable on every phone
 The system SHALL store notes in a format both iOS and Android can play natively.

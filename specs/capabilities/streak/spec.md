@@ -1,8 +1,9 @@
 # Capability: streak
 
-One shared streak per corner, kept alive by everyone together.
+One shared streak per corner, kept alive by everyone together. People read it as "weeks side
+by side".
 
-Status: built in change 006. Server: `corner_streak`, `get_corner_by_token`,
+Status: built in change 006; shown as weeks side by side since change 009. Server: `corner_streak`, `get_corner_by_token`,
 `my_corner_streaks` in `supabase/migrations/*streak.sql`. Shown in `supporter/app.js` and
 `athlete/src/screens/CornerScreen.tsx` (wording: `athlete/src/lib/streak.ts`). Verified by
 `e2e/db.test.mjs`, `e2e/streak.spec.mjs`, `streak.test.ts`.
@@ -49,19 +50,23 @@ The system SHALL NOT compute or show a streak per sender.
   WHEN the athlete or a supporter looks at the corner
   THEN they see one streak for the corner and no per-person counts.
 
-### R4 — Everyone in the corner sees it
-The system SHALL show the corner streak to the athlete in the app and to supporters on the
-share page, in gentle wording.
+### R4 — Everyone sees it, and it is hard to miss
+The system SHALL show the streak to the athlete in the app and to supporters on the share
+page as a row of dots, one per week side by side with this week's dot hollow until someone
+has left a message, a headline ("3 weeks side by side") and one plain sentence that names
+the athlete on the supporter's side.
 
 - GIVEN a corner with a streak of 3 and no note yet this week
   WHEN a supporter opens the share link
-  THEN they see that the corner has shared 3 weeks in a row and that a note this week keeps
-  it going.
+  THEN they see three filled dots and one hollow, "3 weeks side by side", and "Someone has
+  been there for Sam every week for 3 weeks. This week is still open. Will it be you?"
 
 - GIVEN a supporter who sends a note in a week that had none
   WHEN the page refreshes the corner
-  THEN the streak shown goes up by one and this week is reported as part of it.
+  THEN the headline goes up by one, this week's dot is filled, and the sentence ends
+  "this week too".
 
 - GIVEN a corner whose streak is 0
   WHEN anyone looks at it
-  THEN they see an invitation to share the first moment, not a broken streak.
+  THEN a supporter reads "Be the first one there" and the athlete reads "No one yet. Send
+  your link to the people close to you.", never a broken streak.

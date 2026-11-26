@@ -2,7 +2,7 @@
 
 Each corner has one link the athlete sends to their people.
 
-Status: built. R2–R4 in change 002 (`supporter/`, `get_corner_by_token`), R1 in change 003
+Status: built; what the link shows grew in change 009. R2–R4 in change 002 (`supporter/`, `get_corner_by_token`), R1 in change 003
 (`athlete/src/screens/CornerScreen.tsx`). Verified by `e2e/supporter.spec.mjs`,
 `e2e/athlete-corners.spec.mjs`, `e2e/db.test.mjs`.
 
@@ -18,12 +18,13 @@ The system SHALL give every corner an unguessable share link of the form
   sheet with a short invitation that contains the link.
 
 ### R2 — The link opens the corner for anyone, no account
-The system SHALL show the corner's goal name and finish date to anyone who opens the link in
-a browser, without sign-up.
+The system SHALL show the athlete's first name, the goal, its day and the plan (see `plan`
+R4) to anyone who opens the link in a browser, without sign-up.
 
 - GIVEN a share link for the corner "Berlin Marathon" finishing on 2027-09-26
   WHEN a supporter opens it in a browser they have never used with Nopa
-  THEN they see "Berlin Marathon" and the finish date, and a way to record a note.
+  THEN they see whose goal it is, "Berlin Marathon", the finish date, and a calendar of
+  training days to choose from.
 
 ### R3 — Unknown links fail gently
 The system SHALL show a friendly message, and no recording controls, when the link's token
@@ -43,4 +44,5 @@ The system SHALL NOT expose other supporters' notes, names or contacts through t
 
 - GIVEN a corner that already holds notes
   WHEN a supporter opens the share link
-  THEN they can read only the goal name, finish date and corner streak.
+  THEN they can read only the athlete's first name, the goal, its day, the shared streak, and
+  how many messages each upcoming session has.
