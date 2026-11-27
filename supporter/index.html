@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nopa</title>
+<meta name="description" content="Pick a training day and leave a short voice message for someone working towards a goal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Jost:wght@300;400;500&display=swap">
+<style>
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+  /* Layout: a calendar and little else. Dots under a day are messages waiting there. */
+  :root {
+    --paper: #f7f4ec; --ink: #2d2c27; --pencil: #85817a; --rule: #e3ded2; --sage: #6c7a60; --red: #9c4a38;
+    --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --sans: "Jost", "Avenir Next", "Century Gothic", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --paper: #1e1d19; --ink: #efebe2; --pencil: #a8a396; --rule: #3a3832; --sage: #adbaa0; --red: #e0937f; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --paper: #1e1d19; --ink: #efebe2; --pencil: #a8a396; --rule: #3a3832; --sage: #adbaa0; --red: #e0937f; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper); color: var(--ink); font: 400 17px/1.5 var(--sans);
+    padding-block: 20px 56px;
+    padding-left: max(22px, env(safe-area-inset-left, 0px));
+    padding-right: max(22px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+  section.view { display: flex; flex-direction: column; gap: 26px; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; color: var(--pencil); font-size: .95rem; }
+  .top b { font: italic 400 1.6rem/1 var(--serif); color: var(--ink); }
+  h1 { font: 400 2.5rem/1.05 var(--serif); margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  .soft { color: var(--pencil); }
+  .group { display: flex; flex-direction: column; gap: 10px; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+  .btn { display: block; width: 100%; min-height: 54px; padding: 12px 18px; text-align: center; border: 1px solid var(--ink); border-radius: 12px; }
+  .btn.main { background: var(--ink); color: var(--paper); font-weight: 500; }
+  .btn.main.red { background: var(--red); border-color: var(--red); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .txt { color: var(--pencil); font-size: .95rem; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--rule); min-height: 44px; }
+  .top .txt { text-decoration: none; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 1px solid var(--sage); outline-offset: 3px; }
+
+  /* weeks side by side: one dot per week */
+  .together { display: flex; flex-direction: column; gap: 6px; }
+  .weeks { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+  .weeks i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--sage); }
+  .weeks i.on { background: var(--sage); }
+  .together b { font: 400 1.6rem/1.15 var(--serif); }
+
+  /* the calendar */
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; }
+  .cal .mo { grid-column: 1 / -1; color: var(--pencil); font-size: .95rem; padding-bottom: 10px; }
+  .cal .wd { text-align: center; font-size: .78rem; color: var(--pencil); padding-bottom: 6px; }
+  .cal .d { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0 4px; min-height: 58px; color: var(--pencil); }
+  .cal .d .n { width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 50%; font-size: 1rem; }
+  .cal .d.has { color: var(--ink); }
+  .cal .d.has .n { font-weight: 500; }
+  .cal .d.today .n { box-shadow: inset 0 0 0 1px var(--ink); }
+  .cal .d.sel .n { background: var(--ink); color: var(--paper); }
+  .cal .d.past { opacity: .4; }
+  .cal .m { display: flex; gap: 3px; height: 8px; align-items: center; }
+  .cal .m i { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); }
+  .cal .m i.none { background: none; box-shadow: inset 0 0 0 1.2px var(--pencil); }
+  .cal .m i.heard { background: var(--rule); }
+  .cal .m span { font-size: .7rem; line-height: 8px; color: var(--sage); }
+  .legend { display: flex; gap: 16px; font-size: .85rem; color: var(--pencil); align-items: center; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--sage); margin-right: 6px; vertical-align: middle; }
+  .legend i.none { background: none; box-shadow: inset 0 0 0 1.2px var(--pencil); }
+
+  .day { border-top: 1px solid var(--rule); padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .day b { font: 400 1.6rem/1.15 var(--serif); display: block; }
+  .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kinds .btn { min-height: 46px; padding: 8px 4px; font-size: .95rem; }
+
+  label { display: block; color: var(--pencil); font-size: .95rem; margin-bottom: 2px; }
+  input[type=text], textarea, select { font: inherit; color: var(--ink); width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--ink); border-radius: 0; padding: 8px 0; min-height: 46px; }
+  textarea { min-height: 120px; resize: vertical; }
+  ::placeholder { color: var(--pencil); opacity: .7; }
+  audio { width: 100%; }
+  .oops { color: var(--red); }
+  .timer { font: 400 3rem/1 var(--serif); text-align: center; font-variant-numeric: tabular-nums; }
+  .week { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
+  .week > div { display: grid; grid-template-columns: 3em 1fr 5.6em; gap: 12px; align-items: center; border-bottom: 1px solid var(--rule); min-height: 54px; }
+  .week span { color: var(--pencil); font-size: .95rem; }
+  .week select { border: 0; min-height: 44px; }
+  .week select.rest { color: var(--pencil); }
+
+  .stage { text-align: center; padding-block: 56px 40px; display: flex; flex-direction: column; gap: 10px; }
+  .stage .name { font: italic 400 4rem/1 var(--serif); }
+  .stage .calm { font: 400 2.4rem/1.1 var(--serif); text-wrap: balance; }
+  .stage .said { font: italic 400 1.25rem/1.35 var(--serif); }
+  .line { position: relative; height: 22px; margin: 0 6px; }
+  .line::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; border-top: 1px solid var(--rule); }
+  .line .gone { position: absolute; left: 0; top: 10px; border-top: 1px solid var(--ink); }
+  .line .dot { position: absolute; top: 6px; width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; background: var(--sage); }
+  .line .dot.heard { background: var(--rule); }
+  .foot { color: var(--pencil); font-size: .85rem; text-align: center; border-top: 1px solid var(--rule); padding-top: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><b>nopa</b></div>
+
+  <section class="view" id="v-loading"><p class="soft">One moment…</p></section>
+
+  <section class="view" id="v-notfound" hidden>
+    <h1>This link doesn't seem to lead anywhere</h1>
+    <p class="soft">It may have been cut short when it was shared. Ask the person who sent it to share it again.</p>
+  </section>
+
+  <section class="view" id="v-offline" hidden>
+    <h1>We couldn't open this just now</h1>
+    <p class="soft">Check your connection and try again.</p>
+    <button class="btn" onclick="location.reload()">Try again</button>
+  </section>
+
+  <!-- pick a day -->
+  <section class="view" id="v-pick" hidden>
+    <div class="group">
+      <p class="soft" id="p-who"></p>
+      <h1 id="p-name"></h1>
+      <p class="soft" id="p-date"></p>
+    </div>
+    <div class="together" id="p-together"></div>
+    <div class="group">
+      <p id="p-ask"></p>
+      <div class="cal" id="p-cal"></div>
+      <div class="legend"><span><i></i>someone is there</span><span><i class="none"></i>no one yet</span></div>
+    </div>
+    <div class="day" id="p-day" hidden></div>
+    <button class="btn" id="p-any">Or any time</button>
+  </section>
+
+  <!-- the message -->
+  <section class="view" id="v-note" hidden>
+    <button class="txt" id="n-back">back to the calendar</button>
+    <div class="group">
+      <h1 id="n-for"></h1>
+      <p class="soft">Say hello, share a memory, anything you'd say if you were alongside. Up to a minute, and you can listen before you send.</p>
+    </div>
+    <div class="group" id="n-record">
+      <div class="timer" id="n-timer" hidden>0:00</div>
+      <button class="btn main" id="n-rec">Record</button>
+      <p class="oops" id="n-rec-oops" role="alert" hidden></p>
+    </div>
+    <div class="group" id="n-review" hidden style="gap:18px">
+      <p>Have a listen</p>
+      <audio id="n-preview" controls></audio>
+      <div><label for="n-first">Your first name</label><input type="text" id="n-first" maxlength="40" autocomplete="given-name"></div>
+      <p class="oops" id="n-send-oops" role="alert" hidden></p>
+      <button class="btn main" id="n-send">Send</button>
+      <button class="txt" id="n-redo" style="align-self:center">record again</button>
+    </div>
+  </section>
+
+  <!-- sent -->
+  <section class="view" id="v-sent" hidden>
+    <h1>Thank you</h1>
+    <p id="t-line"></p>
+    <div class="group" id="t-ask" style="gap:14px">
+      <div><label for="t-contact" id="t-contact-label"></label><input type="text" id="t-contact" maxlength="200" placeholder="email or phone, if you like"></div>
+      <p class="oops" id="t-oops" role="alert" hidden></p>
+      <button class="btn" id="t-save">Let me know</button>
+      <button class="txt" id="t-skip" style="align-self:center">no thanks</button>
+    </div>
+    <p id="t-done" hidden></p>
+    <button class="btn" id="t-another" hidden>Back to the calendar</button>
+  </section>
+</main>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
