@@ -6,8 +6,10 @@ record a short voice message; the athlete hears them spread through that session
 own music, with the phone locked away.
 
 This is a working first version of the whole loop. What is built is specified in
-[`specs/`](specs/project.md); what still needs a human is in [`NEEDS-ERIC.md`](NEEDS-ERIC.md);
-status is in [`PROGRESS.md`](PROGRESS.md).
+[`specs/`](specs/product.md). Work in progress is in [`changes/`](changes/) and in
+[GitHub issues](https://github.com/ericmschaap/nopa/issues); anything waiting on Eric carries the
+[`needs-eric`](https://github.com/ericmschaap/nopa/labels/needs-eric) label. Plans, decisions and
+plain-language explanations live in Notion; screens live in Figma (see [`CLAUDE.md`](CLAUDE.md)).
 
 | Folder | What |
 | --- | --- |
@@ -15,7 +17,9 @@ status is in [`PROGRESS.md`](PROGRESS.md).
 | `supporter/` | The supporter page (plain HTML + JS, no build) |
 | `supabase/` | Database migrations and local stack config |
 | `e2e/` | Database tests and Playwright end-to-end tests |
-| `specs/` | Source of truth: project, capability specs, archived changes |
+| `specs/` | Source of truth: product behaviour and capability specs |
+| `changes/` | Change proposals in progress, and `archive/` for finished ones |
+| `app/` | Web build of the athlete app on the hosted project, served at https://ericmschaap.github.io/nopa/app/ (rebuild with `npm run athlete:publish-web`) |
 | `demo/` | A self-contained demo of both sides with no backend, published as a Claude artifact |
 | `index.html` | The earlier milestone 1 playback-proof page. Not part of the product. |
 
@@ -55,13 +59,19 @@ cd athlete && npx expo start --web     # athlete app in a browser tab   (leave r
 There is also a no-backend demo of both sides in `demo/nopa-demo.html`, published as a Claude
 artifact, for looking at the flow without running anything.
 
+## Try it hosted
+
+GitHub Pages serves `main`: the athlete app's web build at https://ericmschaap.github.io/nopa/app/
+and the supporter page at https://ericmschaap.github.io/nopa/supporter/, both on the hosted
+Supabase project. After changing `athlete/`, run `npm run athlete:publish-web` and commit `app/`.
+The web build cannot test locked-screen playback.
+
 ## Run it on a real phone
 
 The browser walk-through proves the loop, not locked-screen playback or ducking: those need
-the native app on a phone. That takes accounts and a device, so the steps are in
-[`NEEDS-ERIC.md`](NEEDS-ERIC.md). In short: create a Supabase project and push the
-migrations, host `supporter/` somewhere with HTTPS, put the project's URL and anon key in
-`athlete/.env` and `supporter/config.js`, then `cd athlete && npx expo run:ios --device`
+the native app on a phone. The hosted Supabase project (`nopa`,
+Frankfurt) already has the migrations applied, and `athlete/.env.hosted` and
+`supporter/config.js` point at it. Copy `athlete/.env.hosted` to `athlete/.env`, then `cd athlete && npx expo run:ios --device`
 (or `run:android`). The app needs a development build; it does not run in Expo Go.
 
 ## Tests
@@ -74,13 +84,13 @@ npm run e2e       # 34 Playwright tests: builds the athlete web app, then drives
 
 `npm run db:test` and `npm run e2e` need `npm run db:start` first. The e2e suite uses
 Chromium's fake microphone to really record, and a controllable clock to run a 60-minute
-session in seconds. Each capability scenario in `specs/capabilities/` is mapped to the test
+session in seconds. Each capability scenario in `specs/` is mapped to the test
 that checks it in the archived change's `tasks.md`.
 
 ## How it works, briefly
 
 - **No accounts to manage.** The athlete app signs in anonymously on first launch.
-  Supporters use the public key and can only do three things: read a corner's name, date and
+  Supporters use the public key and can only do three things: read a circle's name, date and
   streak by its link token; upload a WAV; attach a note (and optionally a contact) to it.
 - **Notes are WAV.** The supporter's browser converts whatever it recorded to mono 16-bit
   WAV, so every phone can play every note with no server transcoding.
@@ -94,10 +104,10 @@ that checks it in the archived change's `tasks.md`.
   and back, so the athlete's own audio dips and returns.
 - **Heard.** A note that plays to the end is saved as heard on the phone, then sent to the
   server with its time; marks made with no signal go out later.
-- **Streak.** One per corner, in ISO weeks (UTC): consecutive weeks in which anyone sent a
+- **Streak.** One per circle, in ISO weeks (UTC): consecutive weeks in which anyone sent a
   note. The current week stays open until it ends.
 
 ## Working on it
 
-Work is spec-first; see [`CLAUDE.md`](CLAUDE.md). One change at a time under
-`specs/changes/`, verified and archived before the next begins.
+Work is spec-first; see [`CLAUDE.md`](CLAUDE.md). Each change lives under
+`changes/` until it is built and archived; each piece of work is a GitHub issue and one PR.

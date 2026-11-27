@@ -23,13 +23,13 @@ it has played to the end in a session.
 ### R2 — Heard notes are not replayed
 The system SHALL leave heard notes out of later sessions.
 
-- GIVEN a corner with 2 heard notes and 1 unheard note
+- GIVEN a circle with 2 heard notes and 1 unheard note
   WHEN the athlete starts a session
   THEN only the 1 unheard note is scheduled.
 
 ### R3 — Survives no signal
 The system SHALL save a heard mark on the phone before sending it, retry unsent marks on the
-next launch and whenever a corner is refreshed, and keep the original timestamp. Until a mark
+next launch and whenever a circle is refreshed, and keep the original timestamp. Until a mark
 has been sent, the app already treats the note as heard.
 
 - GIVEN a note that finished playing while the phone had no signal
@@ -37,10 +37,10 @@ has been sent, the app already treats the note as heard.
   THEN the note is marked heard on the server with the time it was actually heard.
 
 ### R4 — Only the owner can mark, and only once
-The system SHALL accept a heard mark only from the athlete who owns the corner, and SHALL
+The system SHALL accept a heard mark only from the athlete who owns the circle, and SHALL
 keep the first timestamp if a note is marked again.
 
-- GIVEN a note in athlete A's corner
+- GIVEN a note in athlete A's circle
   WHEN athlete B or a supporter tries to mark it heard
   THEN nothing changes.
 
