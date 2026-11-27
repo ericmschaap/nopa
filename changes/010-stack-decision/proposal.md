@@ -1,6 +1,6 @@
 # 010 — Stack decision
 
-Status: **proposed, waiting for Eric.** GitHub issue: "Decide the client stack (change 010)".
+Status: **proposed, waiting for Eric.** GitHub issue: #4.
 
 ## Why
 
@@ -27,7 +27,7 @@ Eric has to accept explicitly.
   tests. Timers are frozen when Safari is in the background.
 - **Web, mode B** (all messages stitched into one long audio file with silence in the gaps,
   played by one `<audio>` element): worked in 1-minute tests. The 10-minute-gap test is
-  in progress (Eric, issue "Run the 10-minute locked iPhone test"). Even if it passes, Safari
+  in progress (Eric, #6). Even if it passes, Safari
   playing audio **stops** Spotify or Apple Music rather than ducking it, and the whole session
   must be known and downloaded up front.
 - **Native (Expo / React Native with `expo-audio`)**: the athlete app in `athlete/` is built

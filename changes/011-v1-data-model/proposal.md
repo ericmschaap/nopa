@@ -1,6 +1,6 @@
 # 011 — v1 data model
 
-Status: **proposed, waiting for Eric.** GitHub issue: "Agree the v1 data model (change 011)".
+Status: **proposed, waiting for Eric.** GitHub issue: #5.
 
 ## Why
 
