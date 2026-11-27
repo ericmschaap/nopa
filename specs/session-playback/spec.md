@@ -6,7 +6,7 @@ Status: built in change 004; length and choice of messages now come from the pla
 `athlete/src/lib/audio.ts` (expo-audio). Screens: `CornerScreen.tsx`, `SessionScreen.tsx`.
 Verified by unit tests beside the logic and `e2e/session.spec.mjs` (web build).
 **R3 (screen locked) and R4 (ducking) are implemented but only checkable on a real phone —
-see the GitHub #12 (label `needs-eric`).**
+see GitHub issue #12 (label `needs-eric`).**
 
 ## Requirements
 
