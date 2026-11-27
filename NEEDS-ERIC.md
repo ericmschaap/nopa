@@ -5,25 +5,22 @@ walk-through in the README; all of it is needed to hear a note on a locked phone
 
 ## 1. Accounts and hosting (about 30 minutes)
 
-- [ ] **Supabase project.** Create one at supabase.com (free tier is enough). Then, from the
-      repo root:
-      ```bash
-      npx supabase login
-      npx supabase link --project-ref <your-project-ref>
-      npx supabase db push          # applies supabase/migrations, including the notes bucket
-      ```
-- [ ] **Turn on anonymous sign-ins** in the Supabase dashboard: Authentication → Sign In /
-      Providers → "Allow anonymous sign-ins". The athlete app cannot start without it.
-      (Locally this is already on via `supabase/config.toml`.) Supabase recommends adding a
-      CAPTCHA before a public launch to stop sign-up abuse; not needed for testing.
-- [ ] **Keys.** From Project Settings → API copy the project URL and the `anon` public key
-      into both `supporter/config.js` and `athlete/.env` (copy `athlete/.env.example`).
-      Both values are public by design, so committing `supporter/config.js` is fine.
-      Never put the `service_role` key anywhere in this repo.
-- [ ] **Host the supporter page.** Any static host with HTTPS works (GitHub Pages, Netlify,
-      Cloudflare Pages, Vercel): publish the `supporter/` folder as it is, no build step.
-      Put its address in `athlete/.env` as `EXPO_PUBLIC_SUPPORTER_URL`; share links are
-      `<that address>/?c=<token>`.
+- [x] **Supabase project.** Created 2026-11-27: project `nopa` (ref `ltukqsljtzqfgpvlkdtd`,
+      Frankfurt, free plan), with the migrations in `supabase/migrations` applied. To push new
+      migrations later: `npx supabase login`, `npx supabase link --project-ref ltukqsljtzqfgpvlkdtd`,
+      `npx supabase db push`.
+- [x] **Anonymous sign-ins** turned on in the dashboard. Supabase recommends adding a CAPTCHA
+      before a public launch to stop sign-up abuse; not needed for testing.
+- [x] **Keys.** The project URL and `anon` key are in `supporter/config.js` and
+      `athlete/.env.hosted` (copy it to `athlete/.env` before building onto a phone). Both are
+      public by design. Never put the `service_role` key anywhere in this repo.
+      Local work is unchanged: `npm run supporter` and the e2e suite serve
+      `supporter/config.local.js` instead.
+- [ ] **Host the supporter page.** GitHub Pages is on for this public repo, serving `main`.
+      Once this branch is merged, the page is at https://ericmschaap.github.io/nopa/supporter/
+      and share links are `https://ericmschaap.github.io/nopa/supporter/?c=<token>`
+      (already set as `EXPO_PUBLIC_SUPPORTER_URL` in `athlete/.env.hosted`). Check
+      Settings → Pages shows "Deploy from a branch: main / (root)".
 - [ ] **Build the athlete app onto a phone.** It uses native background audio, so it needs a
       development build, not Expo Go:
       - iPhone: a Mac with Xcode and your Apple ID, then `cd athlete && npx expo run:ios --device`.

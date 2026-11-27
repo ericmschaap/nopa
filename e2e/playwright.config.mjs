@@ -19,7 +19,7 @@ export default defineConfig({
     },
   },
   webServer: [
-    { command: 'node ../scripts/serve.mjs ../supporter 8080', url: SUPPORTER_URL, reuseExistingServer: true },
+    { command: 'node ../scripts/serve.mjs ../supporter 8080 --local', url: SUPPORTER_URL, reuseExistingServer: true },
     { command: 'node ../scripts/serve.mjs ../athlete/dist 8081', url: ATHLETE_URL, reuseExistingServer: true },
   ],
 });

@@ -7,7 +7,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "node --test --test-reporter=spec e2e/db.test.mjs",
-    "supporter": "node scripts/serve.mjs supporter 8080",
+    "supporter": "node scripts/serve.mjs supporter 8080 --local",
     "athlete:web": "npm run athlete:build-web && node scripts/serve.mjs athlete/dist 8081",
     "test": "cd athlete && npm test",
     "e2e": "npm run athlete:build-web && playwright test --config e2e/playwright.config.mjs --trace off",

@@ -1,10 +1,12 @@
-// Tiny static file server for local use: node scripts/serve.mjs <dir> <port>
+// Tiny static file server for local use: node scripts/serve.mjs <dir> <port> [--local]
+// With --local, a request for /config.js gets config.local.js (the local Supabase stack).
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 
 const root = resolve(process.argv[2] || '.');
 const port = Number(process.argv[3] || 8080);
+const local = process.argv.includes('--local');
 const types = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -14,7 +16,8 @@ const types = {
 
 createServer(async (req, res) => {
   try {
-    const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    if (local && path === '/config.js') path = '/config.local.js';
     let file = normalize(join(root, path));
     if (!file.startsWith(root)) throw new Error('outside root');
     if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
