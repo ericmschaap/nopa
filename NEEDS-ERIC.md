@@ -16,7 +16,10 @@ walk-through in the README; all of it is needed to hear a note on a locked phone
       public by design. Never put the `service_role` key anywhere in this repo.
       Local work is unchanged: `npm run supporter` and the e2e suite serve
       `supporter/config.local.js` instead.
-- [ ] **Host the supporter page.** GitHub Pages is on for this public repo, serving `main`.
+- [x] **Web version of the athlete app** for quick tests, at https://ericmschaap.github.io/nopa/app/
+      (built from `athlete/` into `app/` with `npm run athlete:publish-web`; rebuild and commit
+      after athlete changes). Same live database. It cannot test locked-screen playback.
+- [x] **Host the supporter page.** GitHub Pages is on for this public repo, serving `main`.
       Once this branch is merged, the page is at https://ericmschaap.github.io/nopa/supporter/
       and share links are `https://ericmschaap.github.io/nopa/supporter/?c=<token>`
       (already set as `EXPO_PUBLIC_SUPPORTER_URL` in `athlete/.env.hosted`). Check
