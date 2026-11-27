@@ -19,6 +19,7 @@ plain-language explanations live in Notion; screens live in Figma (see [`CLAUDE.
 | `e2e/` | Database tests and Playwright end-to-end tests |
 | `specs/` | Source of truth: product behaviour and capability specs |
 | `changes/` | Change proposals in progress, and `archive/` for finished ones |
+| `app/` | Web build of the athlete app on the hosted project, served at https://ericmschaap.github.io/nopa/app/ (rebuild with `npm run athlete:publish-web`) |
 | `demo/` | A self-contained demo of both sides with no backend, published as a Claude artifact |
 | `index.html` | The earlier milestone 1 playback-proof page. Not part of the product. |
 
@@ -57,6 +58,13 @@ cd athlete && npx expo start --web     # athlete app in a browser tab   (leave r
 
 There is also a no-backend demo of both sides in `demo/nopa-demo.html`, published as a Claude
 artifact, for looking at the flow without running anything.
+
+## Try it hosted
+
+GitHub Pages serves `main`: the athlete app's web build at https://ericmschaap.github.io/nopa/app/
+and the supporter page at https://ericmschaap.github.io/nopa/supporter/, both on the hosted
+Supabase project. After changing `athlete/`, run `npm run athlete:publish-web` and commit `app/`.
+The web build cannot test locked-screen playback.
 
 ## Run it on a real phone
 

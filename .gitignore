@@ -1,4 +1,6 @@
 node_modules/
+# the published web build of the athlete app bundles its fonts under this path
+!/app/assets/node_modules/
 .env
 .env.local
 test-results/
