@@ -82,6 +82,8 @@
   <section>
     <h2>2. Settings</h2>
     <p><label>Gap between note starts: <input id="gap" type="number" min="0.1" step="any" value="10" inputmode="decimal"> minutes</label></p>
+    <p><label>Wait before note 1: <input id="lead" type="number" min="0" step="any" value="1" inputmode="decimal"> minutes</label><br>
+      <span class="sub">Gives you time to lock the phone, so all three notes come due while it is locked. Set 0 to play note 1 right away.</span></p>
     <label class="opt"><input type="radio" name="mode" value="A">
       <span><b>A · Naive</b><br><span class="sub">Play note 1 now, then JavaScript timers start notes 2 and 3.</span></span></label>
     <label class="opt"><input type="radio" name="mode" value="B" checked>
@@ -335,6 +337,16 @@
     if (r.events.length > 300) r.events.splice(100, 1);
     saveLog(); renderLog();
   }
+  // Was the page hidden (phone locked or app in background) at time t? Read from the run's events.
+  function hiddenAt(r, t) {
+    var hidden = null;
+    r.events.forEach(function (e) {
+      if (e.t > t) return;
+      var m = /page (?:became )?(hidden|visible)$/.exec(e.msg);
+      if (m) hidden = m[1] === 'hidden';
+    });
+    return hidden;
+  }
   function renderLog() {
     var box = $('log');
     box.textContent = '';
@@ -342,10 +354,12 @@
     runs.slice().reverse().forEach(function (r) {
       var live = run && r === run.rec;
       var tbl = h('table', {}, h('tr', {},
-        h('th', { text: 'Note' }), h('th', { text: 'Due' }), h('th', { text: 'Started' }), h('th', { text: 'Off by' }),
+        h('th', { text: 'Note' }), h('th', { text: 'Due' }), h('th', { text: 'Locked?' }), h('th', { text: 'Started' }), h('th', { text: 'Off by' }),
         r.mode === 'B' ? h('th', { text: 'JS saw it' }) : null));
       r.planned.forEach(function (due, i) {
-        var c = r.clips[i], cells = [h('td', { text: String(i + 1) }), h('td', { text: clock(due) })];
+        var hid = Date.now() >= due ? hiddenAt(r, due) : null;
+        var c = r.clips[i], cells = [h('td', { text: String(i + 1) }), h('td', { text: clock(due) }),
+          h('td', { text: hid === null ? '–' : hid ? 'yes' : 'no' })];
         if (c) {
           var off = (c.actual - due) / 1000, good = Math.abs(off) <= 3;
           cells.push(h('td', { text: clock(c.actual) }));
@@ -364,7 +378,7 @@
       if (r.beat) foot += ' Last sign of life ' + clock(r.beat.t) + (r.mode === 'B' ? ' at track position ' + mmss(r.beat.pos) : '') + '.';
       box.appendChild(h('div', { class: 'run' },
         h('h3', { text: 'Mode ' + r.mode + ' · ' + new Date(r.t0).toLocaleDateString() + ' ' + clock(r.t0) +
-          ' · gap ' + (r.gapSec / 60) + ' min' + (r.noise ? ' · noise fill' : '') }),
+          ' · gap ' + (r.gapSec / 60) + ' min' + (r.leadSec ? ' · wait ' + (r.leadSec / 60) + ' min' : '') + (r.noise ? ' · noise fill' : '') }),
         tbl,
         h('p', { class: 'sub', style: 'margin:6px 0 0', text: foot }),
         h('details', {}, h('summary', { text: 'Events (' + r.events.length + ')' }),
@@ -401,15 +415,16 @@
 
   function start() {
     var gapSec = Math.max(0.1, parseFloat($('gap').value) || 10) * 60;
+    var leadVal = parseFloat($('lead').value), leadSec = Math.max(0, isNaN(leadVal) ? 1 : leadVal) * 60;
     var mode = selectedMode(), noise = mode === 'B' && $('noise').checked, t0 = Date.now();
-    // Note i starts i*gap after Start; never overlap the previous note.
+    // Note i starts lead + i*gap after Start; never overlap the previous note.
     var offsets = [], end = 0;
     clips.forEach(function (c, i) {
-      var off = Math.max(i * gapSec, i ? end + 1 : 0);
+      var off = Math.max(leadSec + i * gapSec, i ? end + 1 : 0);
       offsets.push(off); end = off + c.dur;
     });
     var rec = {
-      mode: mode, gapSec: gapSec, noise: noise, t0: t0, ua: navigator.userAgent,
+      mode: mode, gapSec: gapSec, leadSec: leadSec, noise: noise, t0: t0, ua: navigator.userAgent,
       planned: offsets.map(function (o) { return Math.round(t0 + o * 1000); }),
       clips: [null, null, null], events: [], beat: null, end: null
     };
@@ -434,13 +449,13 @@
     var a = new Audio(), cur = -1;
     r.audio = a;
     a.addEventListener('playing', function () {
-      if (!run || run !== r || r.rec.clips[cur]) return;
+      if (!run || run !== r || cur < 0 || r.rec.clips[cur]) return;
       var now = Date.now();
       r.rec.clips[cur] = { actual: now, observed: now };
       ev(r.rec, 'note ' + (cur + 1) + ' audibly started');
     });
     a.addEventListener('ended', function () {
-      if (run !== r) return;
+      if (run !== r || cur < 0) return;
       ev(r.rec, 'note ' + (cur + 1) + ' finished');
       if (cur === clips.length - 1) finish('all notes done');
     });
@@ -456,9 +471,20 @@
         if (run === r) ev(r.rec, 'play() REJECTED for note ' + (i + 1) + ': ' + (e && e.name) + ' – ' + (e && e.message));
       });
     }
-    play(0);   // synchronously inside the tap
+    if (r.offsets[0] > 0) {
+      // Unlock the element inside the tap with a short silent clip; timers start every note.
+      var sil = []; fillParts(sil, Math.round(SR * 0.3), false);
+      r.url = URL.createObjectURL(wavBlob(sil));
+      a.src = r.url;
+      var p0 = a.play();
+      if (p0 && p0.catch) p0.catch(function (e) {
+        if (run === r) ev(r.rec, 'unlock play() REJECTED: ' + (e && e.name) + ' – ' + (e && e.message));
+      });
+    } else {
+      play(0);   // synchronously inside the tap
+    }
     r.offsets.forEach(function (off, i) {
-      if (i) r.timers.push(setTimeout(function () { play(i); }, off * 1000));
+      if (i || off > 0) r.timers.push(setTimeout(function () { play(i); }, off * 1000));
     });
   }
 
