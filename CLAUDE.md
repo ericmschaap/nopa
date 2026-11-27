@@ -9,8 +9,8 @@ Claude project; this file is the repo-side summary.
 | Tool | Holds |
 | --- | --- |
 | GitHub (this repo) | Code, specs, migrations, issues, milestones (= sprints), PRs. Task status. |
-| Notion ("Nopa" page) | Product brief, roadmap, sprint pages, decisions log, "How it works". |
-| Figma ("Nopa — app") | Screens, flows, components, design tokens. |
+| Notion ([Nopa](https://app.notion.com/p/4252e15ee4a58123a4b3ec93f8162d01)) | Product brief, roadmap, sprint pages, decisions log, "How it works". |
+| Figma ([Nopa — app](https://www.figma.com/design/gp1PNY8Ydz6hWhtA2vDz7G)) | Screens, flows, components, design tokens. Starter plan: three pages (Foundations, Flows with athlete and sender sections, Explorations) and one variable mode, so light and dark colours are `light/*` and `dark/*` variables. |
 | Supabase (`nopa`, Frankfurt, ref `ltukqsljtzqfgpvlkdtd`) | Live database, auth, audio storage, edge functions. |
 
 Never keep the same thing in two places; link instead. Anything waiting on Eric is a GitHub
