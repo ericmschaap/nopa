@@ -1,6 +1,6 @@
 # Capability: streak
 
-One shared streak per corner, kept alive by everyone together. People read it as "weeks side
+One shared streak per circle, kept alive by everyone together. People read it as "weeks side
 by side".
 
 Status: built in change 006; shown as weeks side by side since change 009. Server: `corner_streak`, `get_corner_by_token`,
@@ -10,10 +10,10 @@ Status: built in change 006; shown as weeks side by side since change 009. Serve
 
 ## Requirements
 
-### R1 — One streak for the whole corner
-The system SHALL keep a single streak per corner, counted in weeks (ISO weeks, Monday to
+### R1 — One streak for the whole circle
+The system SHALL keep a single streak per circle, counted in weeks (ISO weeks, Monday to
 Sunday, UTC): the number of consecutive weeks in which at least one note was sent to the
-corner by anyone. It is computed from the notes when read; nothing is stored.
+circle by anyone. It is computed from the notes when read; nothing is stored.
 
 - GIVEN notes from Anna in week 1, Ben in week 2 and Anna in week 3, and today is in week 3
   WHEN the streak is read
@@ -39,16 +39,16 @@ alive until this week ends without a note.
   WHEN the streak is read
   THEN it is 2: a streak restarts after a gap.
 
-- GIVEN a corner with no notes
+- GIVEN a circle with no notes
   WHEN the streak is read
   THEN it is 0.
 
 ### R3 — No individual streaks
 The system SHALL NOT compute or show a streak per sender.
 
-- GIVEN a corner with notes from several people
-  WHEN the athlete or a supporter looks at the corner
-  THEN they see one streak for the corner and no per-person counts.
+- GIVEN a circle with notes from several people
+  WHEN the athlete or a supporter looks at the circle
+  THEN they see one streak for the circle and no per-person counts.
 
 ### R4 — Everyone sees it, and it is hard to miss
 The system SHALL show the streak to the athlete in the app and to supporters on the share
@@ -56,17 +56,17 @@ page as a row of dots, one per week side by side with this week's dot hollow unt
 has left a message, a headline ("3 weeks side by side") and one plain sentence that names
 the athlete on the supporter's side.
 
-- GIVEN a corner with a streak of 3 and no note yet this week
+- GIVEN a circle with a streak of 3 and no note yet this week
   WHEN a supporter opens the share link
   THEN they see three filled dots and one hollow, "3 weeks side by side", and "Someone has
   been there for Sam every week for 3 weeks. This week is still open. Will it be you?"
 
 - GIVEN a supporter who sends a note in a week that had none
-  WHEN the page refreshes the corner
+  WHEN the page refreshes the circle
   THEN the headline goes up by one, this week's dot is filled, and the sentence ends
   "this week too".
 
-- GIVEN a corner whose streak is 0
+- GIVEN a circle whose streak is 0
   WHEN anyone looks at it
   THEN a supporter reads "Be the first one there" and the athlete reads "No one yet. Send
   your link to the people close to you.", never a broken streak.
