@@ -20,6 +20,7 @@ Test status at the last run: 35 unit, 40 database, 34 end-to-end, all passing.
 | 007 | phone-demo | archived (a demo page, not a product capability) |
 | 008 | plan-based-demo | archived (the demo that set the new direction) |
 | 009 | plan-and-calendar | archived (the product brought in line with the demo) |
+| 010 | calendar-demo | archived (demo trimmed to a plain calendar; product unchanged) |
 
 ## Stubbed
 
