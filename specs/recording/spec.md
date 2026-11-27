@@ -29,12 +29,12 @@ listen back or re-record before sending.
   THEN the supporter is asked to try once more and nothing is kept.
 
 ### R2 — Send with a first name, no account
-The system SHALL store a submitted note against the corner with the supporter's first name,
+The system SHALL store a submitted note against the circle with the supporter's first name,
 without any account.
 
 - GIVEN a supporter with a recording ready and the first name "Anna" entered
   WHEN they tap send
-  THEN the note is stored for that corner with sender "Anna" and they see a thank-you.
+  THEN the note is stored for that circle with sender "Anna" and they see a thank-you.
 
 - GIVEN a supporter with a recording ready and no first name
   WHEN they tap send
@@ -63,7 +63,7 @@ The system SHALL NOT expose a supporter's contact to the athlete or to other sup
 
 ### R6 — For a chosen day, or any time
 The system SHALL store with each message the session the supporter picked, or none for "any
-time", and SHALL refuse a session that belongs to another corner. Where the athlete has no
+time", and SHALL refuse a session that belongs to another circle. Where the athlete has no
 plan yet, a message can still be left.
 
 - GIVEN a supporter who taps tomorrow's hard session and sends a message

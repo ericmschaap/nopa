@@ -10,6 +10,7 @@
     "supporter": "node scripts/serve.mjs supporter 8080 --local",
     "athlete:web": "npm run athlete:build-web && node scripts/serve.mjs athlete/dist 8081",
     "test": "cd athlete && npm test",
+    "lint": "node scripts/lint.mjs",
     "e2e": "npm run athlete:build-web && playwright test --config e2e/playwright.config.mjs --trace off",
     "athlete:build-web": "cd athlete && EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 EXPO_PUBLIC_SUPABASE_ANON_KEY=$(node -e \"import(\\\"../e2e/local.mjs\\\").then(m=>console.log(m.ANON_KEY))\") EXPO_PUBLIC_SUPPORTER_URL=http://localhost:8080 npx expo export --platform web --output-dir dist",
     "e2e:only": "playwright test --config e2e/playwright.config.mjs --trace off"
